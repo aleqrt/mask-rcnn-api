@@ -124,6 +124,7 @@ all available in one dataset.
 
 See examples in `samples/shapes/train_shapes.ipynb`, `samples/coco/coco.py`, `samples/balloon/balloon.py`, and `samples/nucleus/nucleus.py`.
 
+
 ## Differences from the Official Paper
 This implementation follows the Mask RCNN paper for the most part, but there are a few cases where we deviated in favor of code simplicity and generalization. These are some of the differences we're aware of. If you encounter other differences, please do let us know.
 
@@ -164,7 +165,9 @@ Contributions to this repository are welcome. Examples of things you can contrib
 You can also [join our team](https://matterport.com/careers/) and help us build even more projects like this one.
 
 ## Requirements
-Python 3.4, TensorFlow 1.3, Keras 2.0.8 and other common packages listed in `requirements.txt`.
+Python 3.6, TensorFlow 1.15, Keras 2.0.8, anaconda o miniconda and other common packages listed in `requirements.txt`.
+
+
 
 ### MS COCO Requirements:
 To train or test on MS COCO, you'll also need:
@@ -180,16 +183,24 @@ If you use Docker, the code has been verified to work on
 
 ## Installation
 1. Clone this repository
-2. Install dependencies
+2. Create conda enviroment
    ```bash
-   pip3 install -r requirements.txt
+   conda create -n mask-rcnn python=3.6 --channel conda-forge
+   ```  
+3. Activate conda enviroment
+   ```bash
+   conda activate mask-rcnn
+   ```  
+4. Install dependencies
+   ```bash
+   pip install -r requirements.txt
    ```
-3. Run setup from the repository root directory
+5. Run setup from the repository root directory
     ```bash
-    python3 setup.py install
+    python setup.py install
     ``` 
-3. Download pre-trained COCO weights (mask_rcnn_coco.h5) from the [releases page](https://github.com/matterport/Mask_RCNN/releases).
-4. (Optional) To train or test on MS COCO install `pycocotools` from one of these repos. They are forks of the original pycocotools with fixes for Python3 and Windows (the official repo doesn't seem to be active anymore).
+6. Download pre-trained COCO weights (mask_rcnn_coco.h5) from the [releases page](https://github.com/matterport/Mask_RCNN/releases).
+7. (Optional) To train or test on MS COCO install `pycocotools` from one of these repos. They are forks of the original pycocotools with fixes for Python3 and Windows (the official repo doesn't seem to be active anymore).
 
     * Linux: https://github.com/waleedka/coco
     * Windows: https://github.com/philferriere/cocoapi.
