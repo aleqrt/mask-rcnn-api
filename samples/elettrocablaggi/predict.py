@@ -1,3 +1,4 @@
+import glob
 import os
 import sys
 import warnings
@@ -27,14 +28,46 @@ def get_ax(rows=1, cols=1, size=8):
     return fig, ax
 
 
+def from_rois_to_xy(bboxs):
+    """
+    L'oggetto component realizzato nelle regole DLV e' caratterizzato come segue
+
+        x1,y1               x2,y2
+            ----------------
+            |              |
+            |              |
+            |              |
+            |              |
+            |              |
+            |              |
+            ----------------
+        x3,y3               x4,y4
+
+    Per cui è necessario sistemare nuovamente le coordinate restituite dalla rete
+
+    Param:
+        bndbox: [N, (y1, x1, y2, x2)]   NOTA: y2, x2 restituite dalla rete corrispondono a y4, x4 del disegno
+
+    Returns:
+         xy coordinates
+    """
+    xy = np.zeros([len(bboxs), 4])
+    for j, bbox in enumerate(bboxs):
+        for i, e in enumerate(bbox):
+            xy[j, i] = int(e)
+            if i == 3:
+                break
+    return xy
+
+
 if __name__ == '__main__':
 
     info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/train/annots/labels.txt",
                       'annotation_dir': "dataset/elettrocablaggi_20200921/train/annots/",
                       'images_dir': "dataset/elettrocablaggi_20200921/train/images/"},
             'test': {'label_file_path': "dataset/elettrocablaggi_20200921/test/annots/labels.txt",
-                     'annotation_dir': "dataset/elettrocablaggi_20200921/test/annots/",
-                     'images_dir': "dataset/elettrocablaggi_20200921/test/images/"},
+                     'annotation_dir': "dataset/elettrocablaggi_20200921/test/real/annots/",
+                     'images_dir': "dataset/elettrocablaggi_20200921/test/real/images/"},
             'saved_model_dir': "weights/elettrocablaggi_20200921/"}
 
     inference_config = elettrocablaggi.ElettrocablaggiInferenceConfig()
@@ -96,6 +129,34 @@ if __name__ == '__main__':
         print("saving inferred image in ", prediction_dir + '/' + image_name)
         fig.savefig(prediction_dir + '/' + image_name)
         plt.close(fig)
+
+        # create file and directory
+        file_name = "facts_{}.txt".format(image_name[:-4])
+        facts_dir = os.path.join(prediction_dir, "facts")
+
+        # check if directory exist and the file is empty
+        if not os.path.isdir(facts_dir):
+            os.mkdir(os.path.join(prediction_dir, "facts"))
+        if glob.glob(os.path.join(facts_dir, file_name)):
+            os.remove(os.path.join(facts_dir, file_name))
+
+        # write facts for DLV reasoner in a txt file
+        xy = from_rois_to_xy(r['rois'])
+
+        with open(os.path.join(facts_dir, file_name), "a") as f:
+            for i in range(xy.shape[0]):
+                # NOTE: READ DESCRIPTION IN from_rois_to_xy FUNCTION TO UNDERSTAND THE COORDINATES OF COMPONENT
+                y1 = xy[i, 0]
+                x1 = xy[i, 1]
+                y4 = xy[i, 2]
+                x4 = xy[i, 3]
+
+                y2 = xy[i, 0]
+                x2 = xy[i, 3]
+                y3 = xy[i, 2]
+                x3 = xy[i, 1]
+                f.write('component("{}",{},{},{},{},{},{},{},{},{}). \n'.format(r['class_ids'][i], i+1, x1, y1, x2, y2, x3, y3, x4, y4))
+        f.close()
 
         # compute AP
         AP, precisions, recalls, overlaps = utils.compute_ap(gt_bbox, gt_class_id, gt_mask,
