@@ -108,21 +108,21 @@ def main(input_folder, output_folder):
                 json.dump(assets[img], outfile, indent=4)
 
             """
-                Nel caso in cui VoTT durante la fase di annotazione ruotasse le immagini di 90° in senso antiorario
+                Nel caso in cui VoTT durante la fase di annotazione ruota le immagini di 90° in senso antiorario
                 => decommentare le righe sottostanti ed eseguire la conversione delle annotazioni JSON VOC.
             """
-            # new_annot = dict()
-            # new_annot['regions'] = list()
-            # if assets[img]['asset']['size']['height'] < assets[img]['asset']['size']['width']:
-            #     height = assets[img]['asset']['size']['width']
-            #     width = assets[img]['asset']['size']['height']
-            #     for region in assets[img]['regions']:
-            #         new_annot['regions'].append(new_xy_coordinates(region, width))
-            #
-            # # TODO: parametrizzare la cartella di destinazione nel caso di immagini ruotate da VoTT
-            # images_path = 'dataset/elettrocablaggi_20200921/test/real/images/'
-            #
-            # save_annot(new_annot, name, images_path, output_folder, width, height)
+            new_annot = dict()
+            new_annot['regions'] = list()
+            if assets[img]['asset']['size']['height'] < assets[img]['asset']['size']['width']:
+                height = assets[img]['asset']['size']['width']
+                width = assets[img]['asset']['size']['height']
+                for region in assets[img]['regions']:
+                    new_annot['regions'].append(new_xy_coordinates(region, width))
+
+            # TODO: parametrizzare la cartella di destinazione nel caso di immagini ruotate da VoTT
+            images_path = '../../../images/all/images/'
+
+            save_annot(new_annot, name, images_path, output_folder, width, height)
 
 
 if __name__ == '__main__':

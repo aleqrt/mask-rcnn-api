@@ -70,9 +70,14 @@ def new_xy_coordinates(region, w, h, key, random_degree):
         return res
 
 
-def random_rotation(image_array: ndarray):
-    random_degree = np.random.choice([90, 270])
-    return sk.transform.rotate(image_array, random_degree, resize=True), random_degree
+def rotation90(image_array: ndarray):
+    degree = 90
+    return sk.transform.rotate(image_array, degree, resize=True), degree
+
+
+def rotation270(image_array: ndarray):
+    degree = 270
+    return sk.transform.rotate(image_array, degree, resize=True), degree
 
 
 def gaussian_blur(image_array: ndarray):
@@ -123,7 +128,8 @@ def classic_augmentation(images_path, annots_path):
     """
     # dictionary of the transformations we defined earlier
     available_transformations = {
-        'rotate': random_rotation,
+        'rotate90': rotation90,
+        'rotate270': rotation270,
         'gaussian_blur': gaussian_blur,
         'sharpening': sharpening,
         'horizontal_flip': horizontal_flip
@@ -153,7 +159,7 @@ def classic_augmentation(images_path, annots_path):
             new_annot = dict()
             new_annot['regions'] = list()
 
-            if key is 'rotate':
+            if key is 'rotate90' or 'rotate270':
                 transformed_image, random_degree = available_transformations[key](image_to_transform)
                 height = annot['assets']['size']['width']
                 width = annot['assets']['size']['height']
