@@ -1,167 +1,227 @@
 import argparse
-import json
 import os
+import json
 import string
 import random
 import numpy as np
-from PIL import Image
-from PIL import ImageFilter
-
-"""
- Il dataset contenete le immagini di background e la cartella dei componenti deve trovarsi al path
-   - ../../images/data_augmentation/
-   
- Il dataset contenete le immagini con i ritagli dei singoli componenti deve trovarsi nella sottocartella
-   - ../../images/data_augmentation/componenti/
- 
- Le annotazioni dei singoli componenti si trovano nella sottocartella
-   - ../../images/data_augmentation/componenti_label/vott-json-export/json_singoli_componenti
-   
- Il risultato della data augmentation viene salvato nel seguente path:
-   - dataset/elettrocablaggi_20200921/augmentation
-"""
+from scipy import ndarray
+import skimage as sk
+from skimage import transform
+from skimage import filters
+from skimage import io
+from skimage.util import random_noise
+from skimage.color import rgb2gray
+from skimage.util import invert
+from skimage import exposure
+from sklearn.preprocessing import minmax_scale
 
 
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+def new_xy_coordinates(region, w, h, key, random_degree):
+    """
+    NOTA:
+        -   res['boundingBox']['left'], contiente la coordinata X del punto in alto a sinistra del bbox
+        -   res['boundingBox']['top'], contiente la coordinata Y del punto in alto a sinistra del bbox
+    """
+    res = {'id': region['id'], 'type': region['type'], 'tags': region['tags'], 'boundingBox': dict(), 'points': list()}
+    width = region['boundingBox']['width']
+    height = region['boundingBox']['height']
+
+    if key == 'horizontal_flip':
+        res['boundingBox']['height'] = height
+        res['boundingBox']['width'] = width
+
+        res['boundingBox']['left'] = 2 * (w / 2 - region['boundingBox']['left']) + region['boundingBox']['left'] - width
+        res['boundingBox']['top'] = region['boundingBox']['top']
+
+        for point in region['points']:
+            res['points'].append({'x': 2 * (w / 2 - point['x']) + point['x'] - width, 'y': point['y']})
+
+        return res
+
+    elif key == 'rotate90' or key == 'rotate270':
+        res['boundingBox']['height'] = width
+        res['boundingBox']['width'] = height
+
+        theta = np.radians(random_degree)
+        c, s = np.cos(theta), np.sin(theta)
+        R = np.array([[c, -s], [s, c]]).transpose()
+        xy = np.array([region['boundingBox']['left'], region['boundingBox']['top']])
+        vett = np.abs(np.dot(xy, R))
+
+        if random_degree == 90:
+            vett = vett + np.array([0, 2 * (h / 2 - vett[1]) - width])
+        elif random_degree == 270:
+            vett = vett + np.array([2 * (w / 2 - vett[0]) - height, 0])
+
+        res['boundingBox']['left'] = vett[0]
+        res['boundingBox']['top'] = vett[1]
+
+        for point in region['points']:
+            xy = np.array([point['x'], point['y']])
+            vett = np.abs(np.dot(xy, R))
+
+            if random_degree == 90:
+                vett = vett + np.array([0, 2 * (h / 2 - vett[1]) - width])
+            elif random_degree == 270:
+                vett = vett + np.array([2 * (w / 2 - vett[0]) - height, 0])
+
+            res['points'].append({'x': vett[0], 'y': vett[1]})
+        return res
+
+    else:
+        res['boundingBox'] = region['boundingBox']
+        res['points'] = region['points']
+        return res
 
 
-class Rectangle:
-    def __init__(self, top_left, bottom_right):
-        self.bottom_right = bottom_right
-        self.top_left = top_left
-
-    def intersects(self, other):
-        if self.top_left.x > other.bottom_right.x or other.top_left.x > self.bottom_right.x:
-            return False
-        if self.top_left.y < other.bottom_right.y or other.top_left.y < self.bottom_right.y:
-            return False
-        return True
+def rotation90(image_array: ndarray):
+    degree = 90
+    return sk.transform.rotate(image_array, degree, resize=True), degree
 
 
-def is_possible(pixel_occupated, x1, y1, w1, h1):
-    for i in range(len(pixel_occupated)):
-        x2, y2, w2, h2 = pixel_occupated[i, :]
-        # Calculate intersection
-        comp_ind = Rectangle(Point(x1, y1 + h1), Point(x1 + w1, y1))
-        comp_i = Rectangle(Point(x2, y2 + h2), Point(x2 + w2, y2))
-        if comp_ind.intersects(comp_i):
-            return False
-    return True
+def rotation270(image_array: ndarray):
+    degree = 270
+    return sk.transform.rotate(image_array, degree, resize=True), degree
 
 
-def random_position(w, h):
-    x = np.random.randint(180, 575 - w)
-    y = np.random.randint(245, 800 - h)
-    return x, y
+def gaussian_blur(image_array: ndarray):
+    return sk.filters.gaussian(image_array, multichannel=True)
 
 
-def new_annotation(regions, x, y):
-    regions['boundingBox']['left'] = float(regions['boundingBox']['left']) + x
-    regions['boundingBox']['top'] = float(regions['boundingBox']['top']) + y
-    points = regions['points']
-    for point in points:
-        point['x'] = float(point['x']) + x
-        point['y'] = float(point['y']) + y
-    regions['points'] = points
-    return regions
+def sharpening(image_array: ndarray):
+    sobel = sk.filters.sobel(image_array)
+    sobel *= 255
+    sobel = np.abs(sobel)
+    sharped_image = image_array + sobel
+    for i in range(3):
+        sharped_image[:, :, i] = minmax_scale(sharped_image[:, :, i])
+    return sharped_image
 
 
-def save_annot(new_annot, new_file_name, destination_dir_images, destination_dir_annots, background_copy):
+def horizontal_flip(image_array: ndarray):
+    return image_array[:, ::-1]
+
+
+def add_noise(image_array: ndarray):
+    return random_noise(image_array)
+
+
+def rgb_2_gray(image_array: ndarray):
+    return rgb2gray(image_array)
+
+
+def invert_image(image_array: ndarray):
+    return invert(image_array)
+
+
+def rescale_intensity(image_array: ndarray):
+    v_min, v_max = np.percentile(image_array, (0.2, 99.8))
+    return exposure.rescale_intensity(image_array, in_range=(v_min, v_max))
+
+
+def gamma_correction(image_array: ndarray):
+    return exposure.adjust_gamma(image_array, gamma=0.4, gain=0.9)
+
+
+def sigmoid_correction(image_array: ndarray):
+    return exposure.adjust_sigmoid(image_array)
+
+
+def save_annot(new_annot, new_file_name, images_path, annots_path, width, height):
     new_annot['asset'] = {"format": "png",
-                           "id": ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)),
-                           "name": new_file_name + '.jpg',
-                           "path": destination_dir_images + new_file_name + '.jpg',
+                           "id": ''.join(
+                               random.choice(string.ascii_uppercase + string.digits) for _ in range(10)),
+                           "name": new_file_name,
+                           "path": images_path + new_file_name,
                            "size": {
-                               "width": background_copy.size[0],
-                               "height": background_copy.size[1]
+                               "width": width,
+                               "height": height
                            },
                            "state": 2,
                            "type": 1
                            }
-    with open(destination_dir_annots + new_file_name + '.json', 'w') as outfile:
+    with open(os.path.join(annots_path, new_file_name + '.json'), 'w') as outfile:
         json.dump(new_annot, outfile, indent=4)
 
 
-def main(images_path, annots_path):
+def classic_augmentation(images_path, annots_path):
     """
     Main function for data augmentation.
     Params:
-        - images_path: path in which are images for data augmentation. Must be contain 'componenti' folder in
-                        which is stored images for each component.
-        - annots_path: path in which are annotation in .json
+        - images_path: path in which are images
+        - annots_path: path in which are annotation in json format
 
     Returns:
-        - new images in 'dataset/elettrocabalaggi_20200921/augmentation' folder
-        - new annotation in 'dataset/elettrocabalaggi_20200921/annotation' folder
-
-        NOTE:
-            create data_augmentation folder in images_path and annots_path folders
-
+        - new images in 'images_path' folder
+        - new annotation in 'annots_path' folder
     """
-    annots = [f for f in os.listdir(annots_path) if os.path.isfile(os.path.join(annots_path, f))]
+    # dictionary of the transformations we defined earlier
+    available_transformations = {
+        'rotate90': rotation90,
+        'rotate270': rotation270,
+        'gaussian_blur': gaussian_blur,
+        'sharpening': sharpening,
+        'horizontal_flip': horizontal_flip,
+        'add_noise': add_noise,
+        'rgb_2_gray': rgb_2_gray,
+        'invert_image': invert_image,
+        'rescale_intensity': rescale_intensity,
+        'gamma_correction': gamma_correction,
+        'sigmoid_correction': sigmoid_correction
+    }
 
-    components_path = os.path.join(images_path, 'componenti')
-    backgrounds = [os.path.join(images_path, f) for f in os.listdir(images_path) if
-                   os.path.isfile(os.path.join(images_path, f))]
-    components = [f for f in os.listdir(components_path) if os.path.isfile(os.path.join(components_path, f))]
+    # find all files paths from the folders
+    images_name = [f for f in os.listdir(images_path) if os.path.isfile(os.path.join(images_path, f))]
+    annots_name = [a for a in os.listdir(annots_path) if os.path.isfile(os.path.join(annots_path, a))]
 
-    destination_dir_images = 'dataset/elettrocablaggi_20200921/all/images/'
-    destination_dir_annots = 'dataset/elettrocablaggi_20200921/all/annots/'
-
+    num_files = len(annots_name)
     tot = 0
-    max_count = 10000
 
-    for background in backgrounds:
-        background = Image.open(background)
-        count = 0
+    for i in range(num_files):
+        # chose random image from the folder
+        image = images_name[i]
+        file = os.path.join(annots_path, annots_name[images_name.index(image)])
+        f = open(file, encoding='utf-8')
+        annot = json.load(f)
 
-        while count < max_count / len(backgrounds):
-            background_copy = background.copy()
-            pixel_occupated = np.zeros([len(components), 4], dtype=int)
+        # read image as an two dimensional array of pixels and read XML annotation
+        image_to_transform = sk.io.imread(os.path.join(images_path, image))
+
+        # transformation to apply for a single image
+        random_degree = 0
+        keys = list(available_transformations)
+        for key in keys:
             new_annot = dict()
             new_annot['regions'] = list()
-            ind = 0
-            for component in components:
-                comp = Image.open(os.path.join(components_path, component))
 
-                # Decommentare la riga seguente per avere le immagini BLUR dei singoli componenti
-                # NOTA
-                #       1) Fare run con tot = 0 per le immagini dei componenti.
-                #       2) Fare run con tot = max_count per le immagini BLUR dei componenti.
-                if tot > max_count/2:
-                    comp = comp.filter(ImageFilter.GaussianBlur)
+            if key is 'rotate90' or key is 'rotate270':
+                transformed_image, random_degree = available_transformations[key](image_to_transform)
+                height = annot['asset']['size']['width']
+                width = annot['asset']['size']['height']
+            else:
+                transformed_image = available_transformations[key](image_to_transform)
+                width = annot['asset']['size']['width']
+                height = annot['asset']['size']['height']
 
-                w, h = comp.size
+            # generete new annotation for the transformed image
+            for region in annot['regions']:
+                new_annot['regions'].append(new_xy_coordinates(region, width, height, key, random_degree))
 
-                # Ciclo (per un massimo di 1000 volte) per l'inserimento di un componente senza overlap con gli altri
-                for i in range(1000):
-                    x, y = random_position(w, h)
-                    if is_possible(pixel_occupated, x, y, w, h):
-                        pixel_occupated[ind, :] = x, y, w, h
-                        background_copy.paste(comp, (x, y), comp)
-                        annot_name = os.path.join(annots_path, annots[components.index(component)])
-                        f = open(annot_name, encoding='utf-8')
-                        annot = json.load(f)
-                        f.close()
-                        new_annot['regions'].append(new_annotation(annot['regions'][0], x, y))
-                        ind += 1
-                        break
+            # write image to the disk
+            new_file_name = 'classic_augmented_image_%s' % tot
+            io.imsave(os.path.join(images_path, new_file_name + '.jpg'), transformed_image)
 
-            new_file_name = 'augmented_image_%s' % tot
+            save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
+
+            # Incremento contatore per il numero di immagini soggette a trasformazioni
             tot += 1
-            count += 1
-            background_copy.save(destination_dir_images + new_file_name + '.jpg')
-            save_annot(new_annot, new_file_name, destination_dir_images, destination_dir_annots, background_copy)
 
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Data augmentation script')
-    argparser.add_argument('-a', '--annots', help='folder path of json VOC annotations of single component')
-    argparser.add_argument('-i', '--images', help='folder path of images of backgrounds and components')
+    argparser.add_argument('-a', '--annots', help='folder path of json')
+    argparser.add_argument('-i', '--images', help='folder path of images')
 
     args = argparser.parse_args()
 
-    main(args.images, args.annots)
+    classic_augmentation(args.images, args.annots)

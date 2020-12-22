@@ -120,7 +120,7 @@ def main(input_folder, output_folder):
                     new_annot['regions'].append(new_xy_coordinates(region, width))
 
             # TODO: parametrizzare la cartella di destinazione nel caso di immagini ruotate da VoTT
-            images_path = '../../../images/all/images/'
+            images_path = 'dataset/elettrocablaggi_20200921/GRETA_230V/all/images/'
 
             save_annot(new_annot, name, images_path, output_folder, width, height)
 
