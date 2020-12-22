@@ -27,7 +27,7 @@ Per fare ciò, utilizziamo un tool open-source ad hoc per annotare ed etichettar
 
 Una volta effettuata la procedura di labelling delle immagini, è possibile esportare le annotazioni in vari formati. Scegliamo come Provider "VoTT JSON": il programma esporterà le annotazioni in formato JSON, generando un file contenente le annotazioni di ogni immagine.
 
-![alt text](https://github.com/AlessandroQuarta/Mask-RCNN/assets/vott_export_format.jpg?raw=true)
+![alt text](https://github.com/AlessandroQuarta/Mask_RCNN/tree/develop/assets/vott_export_format.png?raw=true)
 
 Fatto ciò, è necessario effettuare una conversione delle annotazioni del file generato da Microsoft VoTT, in modo da poter estrarre per ogni immagine un file json contenente le anotazione della singola immagine.
 
