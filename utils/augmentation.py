@@ -3,6 +3,7 @@ import os
 import json
 import string
 import random
+import warnings
 import numpy as np
 from scipy import ndarray
 import skimage as sk
@@ -10,10 +11,12 @@ from skimage import transform
 from skimage import filters
 from skimage import io
 from skimage.util import random_noise
-from skimage.color import rgb2gray
 from skimage.util import invert
 from skimage import exposure
 from sklearn.preprocessing import minmax_scale
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
 
 
 def new_xy_coordinates(region, w, h, key, random_degree):
@@ -30,11 +33,11 @@ def new_xy_coordinates(region, w, h, key, random_degree):
         res['boundingBox']['height'] = height
         res['boundingBox']['width'] = width
 
-        res['boundingBox']['left'] = 2 * (w / 2 - region['boundingBox']['left']) + region['boundingBox']['left'] - width
+        res['boundingBox']['left'] = 2 * (w / 2 - region['boundingBox']['left']) + region['boundingBox']['left']
         res['boundingBox']['top'] = region['boundingBox']['top']
 
         for point in region['points']:
-            res['points'].append({'x': 2 * (w / 2 - point['x']) + point['x'] - width, 'y': point['y']})
+            res['points'].append({'x': 2 * (w / 2 - point['x']) + point['x'], 'y': point['y']})
 
         return res
 
@@ -49,9 +52,9 @@ def new_xy_coordinates(region, w, h, key, random_degree):
         vett = np.abs(np.dot(xy, R))
 
         if random_degree == 90:
-            vett = vett + np.array([0, 2 * (h / 2 - vett[1]) - width])
+            vett = vett + np.array([0, 2 * (h / 2 - vett[1])])
         elif random_degree == 270:
-            vett = vett + np.array([2 * (w / 2 - vett[0]) - height, 0])
+            vett = vett + np.array([2 * (w / 2 - vett[0]), 0])
 
         res['boundingBox']['left'] = vett[0]
         res['boundingBox']['top'] = vett[1]
@@ -61,9 +64,9 @@ def new_xy_coordinates(region, w, h, key, random_degree):
             vett = np.abs(np.dot(xy, R))
 
             if random_degree == 90:
-                vett = vett + np.array([0, 2 * (h / 2 - vett[1]) - width])
+                vett = vett + np.array([0, 2 * (h / 2 - vett[1])])
             elif random_degree == 270:
-                vett = vett + np.array([2 * (w / 2 - vett[0]) - height, 0])
+                vett = vett + np.array([2 * (w / 2 - vett[0]), 0])
 
             res['points'].append({'x': vett[0], 'y': vett[1]})
         return res
@@ -106,10 +109,6 @@ def add_noise(image_array: ndarray):
     return random_noise(image_array)
 
 
-def rgb_2_gray(image_array: ndarray):
-    return rgb2gray(image_array)
-
-
 def invert_image(image_array: ndarray):
     return invert(image_array)
 
@@ -129,17 +128,17 @@ def sigmoid_correction(image_array: ndarray):
 
 def save_annot(new_annot, new_file_name, images_path, annots_path, width, height):
     new_annot['asset'] = {"format": "png",
-                           "id": ''.join(
-                               random.choice(string.ascii_uppercase + string.digits) for _ in range(10)),
-                           "name": new_file_name,
-                           "path": images_path + new_file_name,
-                           "size": {
-                               "width": width,
-                               "height": height
-                           },
-                           "state": 2,
-                           "type": 1
-                           }
+                          "id": ''.join(
+                              random.choice(string.ascii_uppercase + string.digits) for _ in range(10)),
+                          "name": new_file_name + '.jpg',
+                          "path": images_path + new_file_name + '.jpg',
+                          "size": {
+                              "width": width,
+                              "height": height
+                          },
+                          "state": 2,
+                          "type": 1
+                          }
     with open(os.path.join(annots_path, new_file_name + '.json'), 'w') as outfile:
         json.dump(new_annot, outfile, indent=4)
 
@@ -163,7 +162,6 @@ def classic_augmentation(images_path, annots_path):
         'sharpening': sharpening,
         'horizontal_flip': horizontal_flip,
         'add_noise': add_noise,
-        'rgb_2_gray': rgb_2_gray,
         'invert_image': invert_image,
         'rescale_intensity': rescale_intensity,
         'gamma_correction': gamma_correction,
@@ -174,47 +172,51 @@ def classic_augmentation(images_path, annots_path):
     images_name = [f for f in os.listdir(images_path) if os.path.isfile(os.path.join(images_path, f))]
     annots_name = [a for a in os.listdir(annots_path) if os.path.isfile(os.path.join(annots_path, a))]
 
-    num_files = len(annots_name)
     tot = 0
 
-    for i in range(num_files):
-        # chose random image from the folder
-        image = images_name[i]
-        file = os.path.join(annots_path, annots_name[images_name.index(image)])
-        f = open(file, encoding='utf-8')
-        annot = json.load(f)
+    for i, img in enumerate(images_name):
 
-        # read image as an two dimensional array of pixels and read XML annotation
-        image_to_transform = sk.io.imread(os.path.join(images_path, image))
+        # if i == 1:
+        #     break
 
-        # transformation to apply for a single image
-        random_degree = 0
-        keys = list(available_transformations)
-        for key in keys:
-            new_annot = dict()
-            new_annot['regions'] = list()
+        try:
+            file = os.path.join(annots_path, annots_name[annots_name.index(img[:-4]+'.json')])
+            f = open(file, encoding='utf-8')
+            annot = json.load(f)
 
-            if key is 'rotate90' or key is 'rotate270':
-                transformed_image, random_degree = available_transformations[key](image_to_transform)
-                height = annot['asset']['size']['width']
-                width = annot['asset']['size']['height']
-            else:
-                transformed_image = available_transformations[key](image_to_transform)
-                width = annot['asset']['size']['width']
-                height = annot['asset']['size']['height']
+            # transformation to apply for a single image
+            random_degree = 0
+            keys = list(available_transformations)
+            for key in keys:
+                # read image as an two dimensional array of pixels and read XML annotation
+                image_to_transform = sk.io.imread(os.path.join(images_path, img))
 
-            # generete new annotation for the transformed image
-            for region in annot['regions']:
-                new_annot['regions'].append(new_xy_coordinates(region, width, height, key, random_degree))
+                new_annot = dict()
+                new_annot['regions'] = list()
 
-            # write image to the disk
-            new_file_name = 'classic_augmented_image_%s' % tot
-            io.imsave(os.path.join(images_path, new_file_name + '.jpg'), transformed_image)
+                if key == 'rotate90' or key == 'rotate270':
+                    transformed_image, random_degree = available_transformations[key](image_to_transform)
+                    height = annot['asset']['size']['width']
+                    width = annot['asset']['size']['height']
+                else:
+                    transformed_image = available_transformations[key](image_to_transform)
+                    width = annot['asset']['size']['width']
+                    height = annot['asset']['size']['height']
 
-            save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
+                # generete new annotation for the transformed image
+                for region in annot['regions']:
+                    new_annot['regions'].append(new_xy_coordinates(region, width, height, key, random_degree))
 
-            # Incremento contatore per il numero di immagini soggette a trasformazioni
-            tot += 1
+                # write image to the disk
+                new_file_name = 'augmented_image_%s' % tot
+                io.imsave(os.path.join(images_path, new_file_name + '.jpg'), transformed_image)
+
+                save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
+
+                # Incremento contatore per il numero di immagini soggette a trasformazioni
+                tot += 1
+        except:
+            continue
 
 
 if __name__ == '__main__':

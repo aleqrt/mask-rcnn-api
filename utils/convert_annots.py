@@ -6,30 +6,6 @@ import string
 import argparse
 import numpy as np
 
-"""
-NOTA:
-    Nel caso del dateset elettrocablaggi_20200921 durante l'annotazione delle immagini VoTT ruota di 90° 
-    in senso antiorario le immagini.
-    =>  E' consigliato verificare che il dataset e le annotazioni combacino. 
-        In caso non siano corrette ruotare le immagini.
-       
-    esempio di comando da eseguire per ruotare le immagini 
-        
-        import os
-        import skimage as sk
-        from skimage import io
-        from skimage import transform
-        
-        
-        images_names = [f for f in os.listdir(images_path) if os.path.isfile(os.path.join(images_path, f))]
-        
-        for image_name in images_names:
-            picture = sk.io.imread(os.path.join(images_path, image_name))
-            picture = sk.transform.rotate(picture, 90, resize=True)
-            sk.io.imsave(os.path.join(images_path, image_name), picture)
-
-"""
-
 
 def new_xy_coordinates(region, h):
     """
@@ -104,15 +80,22 @@ def main(input_folder, output_folder):
             name = assets[img]['asset']['name']
             name = name[:-4]
 
-            with open(os.path.join(output_folder, name + '.json'), 'w') as outfile:
-                json.dump(assets[img], outfile, indent=4)
-
-            """
-                Nel caso in cui VoTT durante la fase di annotazione ruota le immagini di 90° in senso antiorario
-                => decommentare le righe sottostanti ed eseguire la conversione delle annotazioni JSON VOC.
-            """
             new_annot = dict()
             new_annot['regions'] = list()
+
+            """
+            NOTA:
+                Nel caso in cui VoTT durante la fase di annotazione ruota le immagini di 90° in senso antiorario
+                => commentare
+            """
+#             width = assets[img]['asset']['size']['width']
+#             height = assets[img]['asset']['size']['height']
+#             for region in assets[img]['regions']:
+#                 new_annot['regions'].append(region)
+
+            """
+                => docommentare
+            """
             if assets[img]['asset']['size']['height'] < assets[img]['asset']['size']['width']:
                 height = assets[img]['asset']['size']['width']
                 width = assets[img]['asset']['size']['height']
@@ -126,7 +109,7 @@ def main(input_folder, output_folder):
 
 
 if __name__ == '__main__':
-    argparser = argparse.ArgumentParser(description='Convert annotations from VoTT JSON to json file for each image')
+    argparser = argparse.ArgumentParser(description='Convert annotations from VoTT JSON to file JSON for each image')
     argparser.add_argument('-o', '--output', help='destination folder for the converted json VOC annotations')
     argparser.add_argument('-i', '--input', help='path to the collection of JSON VOC annotations')
 

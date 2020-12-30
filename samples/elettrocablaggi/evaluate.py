@@ -14,14 +14,10 @@ with warnings.catch_warnings():
 
 if __name__ == '__main__':
 
-    info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/train/annots/labels.txt",
-                      'annotation_dir': "dataset/elettrocablaggi_20200921/train/annots/",
-                      'images_dir': "dataset/elettrocablaggi_20200921/train/images/"},
-            'test': {'label_file_path': "dataset/elettrocablaggi_20200921/test/annots/labels.txt",
+    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/test/annots/labels.txt",
                      'annotation_dir': "dataset/elettrocablaggi_20200921/test/annots/",
                      'images_dir': "dataset/elettrocablaggi_20200921/test/images/"},
-            'saved_model_dir': "weights/elettrocablaggi_20200921/",
-            'coco_weights_path': "weights/mask_rcnn_coco.h5"}
+            'saved_model_dir': "weights/elettrocablaggi_20200921/"}
 
     inference_config = elettrocablaggi.ElettrocablaggiInferenceConfig()
 

@@ -66,7 +66,7 @@ if __name__ == '__main__':
     # Passing layers="all" trains all layers. You can also 
     # pass a regular expression to select which layers to
     # train by name pattern.
-    model.train(dataset_train, dataset_val,
-                learning_rate=config.LEARNING_RATE / 10,
-                epochs=100,
-                layers="all")
+    # model.train(dataset_train, dataset_val,
+    #             learning_rate=config.LEARNING_RATE / 10,
+    #             epochs=100,
+    #             layers="all")

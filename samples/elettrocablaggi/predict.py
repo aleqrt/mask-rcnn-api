@@ -88,7 +88,7 @@ if __name__ == '__main__':
                                                                   info['test']['images_dir'])
     dataset_val.prepare()
 
-    samples = 5
+    samples = 2
     random = False
     replace = False
     single = False
@@ -106,7 +106,6 @@ if __name__ == '__main__':
     # folder where to save predicted images (the same of the model weights)
     prediction_dir = '/'.join(model_path.split('/')[:-1])
 
-    APs = []
     for image_id in image_ids:
         # load original image
         original_image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(dataset_val,
@@ -125,29 +124,31 @@ if __name__ == '__main__':
 
         # write the image with bounding boxes and masks to file
         image_name = dataset_val.source_image_link(image_id).split('/')[-1]
-        print("saving inferred image in ", prediction_dir + '/' + image_name)
-        fig.savefig(prediction_dir + '/' + image_name)
+        
+        # check if directory exist and the file is empty
+        p_dir = os.path.join(prediction_dir, "prediction")
+        if not os.path.isdir(p_dir):
+            os.mkdir(os.path.join(prediction_dir, "prediction"))
+            
+        fig.savefig(os.path.join(p_dir, image_name))
         plt.close(fig)
 
         # create file and directory
+        inferred_dir = os.path.join("reasoner", "inferred")
         file_name = "facts_{}.txt".format(image_name[:-4])
-        facts_dir = os.path.join("reasoner", "dlv_facts")
         dlv_output_name = "output_{}.txt".format(image_name[:-4])
-        dlv_output_dir = os.path.join("reasoner", "dlv_output")
         dlv_program_name = 'neighborhood.asp'
 
         # check if directory exist and the file is empty
-        if not os.path.isdir(facts_dir):
-            os.mkdir(os.path.join("reasoner", "dlv_facts"))
-        if glob.glob(os.path.join(facts_dir, file_name)):
-            os.remove(os.path.join(facts_dir, file_name))
-        if not os.path.isdir(dlv_output_dir):
-            os.mkdir(os.path.join("reasoner", "dlv_output"))
-        if glob.glob(os.path.join(dlv_output_dir, dlv_output_name)):
-            os.remove(os.path.join(dlv_output_dir, dlv_output_name))
+        if not os.path.isdir(inferred_dir):
+            os.mkdir(os.path.join("reasoner", "inferred"))
+        if glob.glob(os.path.join(inferred_dir, file_name)):
+            os.remove(os.path.join(inferred_dir, file_name))
+        if glob.glob(os.path.join(inferred_dir, dlv_output_name)):
+            os.remove(os.path.join(inferred_dir, dlv_output_name))
 
         # write facts for DLV reasoner in a txt file
-        with open(os.path.join(facts_dir, file_name), "a") as f:
+        with open(os.path.join(inferred_dir, file_name), "a") as f:
             for i in range(r['rois'].shape[0]):
                 # NOTE: READ DESCRIPTION IN TOP OF FILE UNDERSTAND THE COORDINATES OF COMPONENT
                 x3 = int(r['rois'][i, 1])
@@ -167,14 +168,7 @@ if __name__ == '__main__':
                                                                                 x2, y2))
         os.system('./{} {} {} --filter=neighbour/5 > {}'
                   .format(os.path.join("reasoner", "dlv2"),
-                          os.path.join(facts_dir, file_name),
+                          os.path.join(inferred_dir, file_name),
                           os.path.join("reasoner", "encoding", dlv_program_name),
-                          os.path.join(dlv_output_dir, dlv_output_name))
+                          os.path.join(inferred_dir, dlv_output_name))
                   )
-
-        # compute AP
-        AP, precisions, recalls, overlaps = utils.compute_ap(gt_bbox, gt_class_id, gt_mask,
-                                                             r["rois"], r["class_ids"], r["scores"], r['masks'])
-        APs.append(AP)
-
-    print("mAP: ", np.mean(APs))

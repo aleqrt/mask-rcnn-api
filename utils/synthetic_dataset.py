@@ -55,8 +55,8 @@ def is_possible(pixel_occupated, x1, y1, w1, h1):
 
 
 def random_position(w, h):
-    x = np.random.randint(180, 575 - w)
-    y = np.random.randint(245, 800 - h)
+    x = np.random.randint(1, 575 - w)
+    y = np.random.randint(1, 800 - h)
     return x, y
 
 
@@ -110,22 +110,24 @@ def main(images_path, annots_path):
                    os.path.isfile(os.path.join(images_path, f))]
     components = [f for f in os.listdir(components_path) if os.path.isfile(os.path.join(components_path, f))]
 
-    destination_dir_images = 'dataset/elettrocablaggi_20200921/all/images/'
-    destination_dir_annots = 'dataset/elettrocablaggi_20200921/all/annots/'
-
     tot = 0
-    max_count = 10000
+    max_count = 7820
 
     for background in backgrounds:
         background = Image.open(background)
         count = 0
 
         while count < max_count / len(backgrounds):
+            # creo una copia dello sfondo su cui aggiungere le componenti random
             background_copy = background.copy()
+
+            # utilizzo un array di supporto per verificare che la posizione nell'img sia disponibile per aggiungere un componente
             pixel_occupated = np.zeros([len(components), 4], dtype=int)
+
             new_annot = dict()
             new_annot['regions'] = list()
             ind = 0
+
             for component in components:
                 comp = Image.open(os.path.join(components_path, component))
 
@@ -138,20 +140,39 @@ def main(images_path, annots_path):
                 # Ciclo (per un massimo di 1000 volte) per l'inserimento di un componente senza overlap con gli altri
                 for i in range(1000):
                     x, y = random_position(w, h)
+
+                    # verifico se è possibile aggiungere un nuovo componente NON sovrapposto
                     if is_possible(pixel_occupated, x, y, w, h):
                         pixel_occupated[ind, :] = x, y, w, h
                         background_copy.paste(comp, (x, y), comp)
-                        annot_name = os.path.join(annots_path, annots[components.index(component)])
-                        f = open(annot_name, encoding='utf-8')
-                        annot = json.load(f)
-                        f.close()
-                        new_annot['regions'].append(new_annotation(annot['regions'][0], x, y))
+
+                        # se aggiungo img di cavi per creare rumore non li considero nel file di annotazioni
+                        if 'cavi' not in component[:-4]:
+                            annot_name = os.path.join(annots_path, annots[annots.index(component[:-4]+'.json')])
+                            file = open(annot_name, encoding='utf-8')
+                            annot = json.load(file)
+                            file.close()
+
+                            for j, reg in enumerate(annot['regions']):
+                                new_annot['regions'].append(new_annotation(annot['regions'][j], x, y))
+
                         ind += 1
                         break
 
-            new_file_name = 'augmented_image_%s' % tot
+            # split train e test set
+            if count <= 0.35*max_count:
+                destination_dir_images = 'dataset/elettrocablaggi_20200921/test/images/'
+                destination_dir_annots = 'dataset/elettrocablaggi_20200921/test/annots/'
+            else:
+                destination_dir_images = 'dataset/elettrocablaggi_20200921/train/images/'
+                destination_dir_annots = 'dataset/elettrocablaggi_20200921/train/annots/'
+
+            new_file_name = 'synthetic_image_%s' % tot
             tot += 1
             count += 1
+
+            print(destination_dir_images + new_file_name + '.jpg')
+
             background_copy.save(destination_dir_images + new_file_name + '.jpg')
             save_annot(new_annot, new_file_name, destination_dir_images, destination_dir_annots, background_copy)
 
