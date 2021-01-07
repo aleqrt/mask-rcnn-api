@@ -1,5 +1,5 @@
 #Readme
-Il seguente repository contient un'implementazione python della rete neurale Mask-RCNN, utilizzata per effettuare 
+Il seguente repository contiene un'implementazione python della rete neurale Mask-RCNN, utilizzata per effettuare 
 instance segmentation su immagini.
 
 Il codice sorgente è scaricabile da github al link https://github.com/matterport/Mask_RCNN.
@@ -27,7 +27,7 @@ Il software è basato su tecnologia React, per cui è possibile utilizzarlo tram
 
 Una volta effettuata la procedura di labelling delle immagini, è possibile esportare le annotazioni in vari formati. Scegliamo come Provider "VoTT JSON". 
 
-![Screenshot](https://github.com/AlessandroQuarta/Mask_RCNN/blob/develop/assets/vott_export_format.PNG)
+![alt text](https://github.com/AlessandroQuarta/Mask_RCNN/tree/develop/assets/vott_export_format.PNG)
 
 Il programma esporterà le annotazioni in formato JSON, generando un file nella sottocartella `vott-json-export`.
 
