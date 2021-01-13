@@ -27,7 +27,7 @@ Il software è basato su tecnologia React, per cui è possibile utilizzarlo tram
 
 Una volta effettuata la procedura di labelling delle immagini, è possibile esportare le annotazioni in vari formati. Scegliamo come Provider "VoTT JSON". 
 
-![alt text](https://github.com/AlessandroQuarta/Mask_RCNN/tree/develop/assets/vott_export_format.PNG)
+Format: ![Alt Text](https://github.com/AlessandroQuarta/Mask_RCNN/tree/master/assets/vott_export_format.PNG)
 
 Il programma esporterà le annotazioni in formato JSON, generando un file nella sottocartella `vott-json-export`.
 
