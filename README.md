@@ -70,5 +70,5 @@ Per effettuare la previsione su una nuova immagine relativa al dataset elettroca
 
 `python samples/elettrocablaggi/predict.py`
 
-**Nota:** è necessaria l'immagine in formato .JPG e il file di annotazioni in formato .JSON nella apposita folder (NON è necessario che l'immagine sia annotata, ma deve essere presente almeno il nome dell'immagine corrispondente su cui si vuole fare previsione).
+**Nota:** è necessaria il file di annotazioni in formato .JSON nella apposita folder (NON è necessario l'annotazione delle componenti, ma deve essere presente almeno il nome dell'immagine su cui si vuole fare previsione).
 
