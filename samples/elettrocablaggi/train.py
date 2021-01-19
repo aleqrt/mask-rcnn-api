@@ -57,6 +57,7 @@ if __name__ == '__main__':
     # Train the head branches
     # Passing layers="heads" freezes all layers except the head
     # layers. You can also pass a regular expression to select
+    print("Train network heads")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
                 epochs=100,
@@ -66,7 +67,8 @@ if __name__ == '__main__':
     # Passing layers="all" trains all layers. You can also 
     # pass a regular expression to select which layers to
     # train by name pattern.
+    # print("Train all layers")
     # model.train(dataset_train, dataset_val,
-    #             learning_rate=config.LEARNING_RATE / 10,
-    #             epochs=100,
+    #             learning_rate=config.LEARNING_RATE,
+    #             epochs=50,
     #             layers="all")

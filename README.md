@@ -1,4 +1,4 @@
-# Readme
+# Mask RCNN
 Il seguente repository contiene un'implementazione python della rete neurale Mask-RCNN, utilizzata per effettuare 
 instance segmentation su immagini.
 
@@ -27,7 +27,7 @@ Il software è basato su tecnologia React, per cui è possibile utilizzarlo tram
 
 Una volta effettuata la procedura di labelling delle immagini, è possibile esportare le annotazioni in vari formati. Scegliamo come Provider "VoTT JSON". 
 
-Format: ![Alt Text](https://github.com/AlessandroQuarta/Mask_RCNN/tree/master/assets/vott_export_format.PNG)
+![Alt Text](https://github.com/AlessandroQuarta/Mask_RCNN/tree/master/assets/vott_export_format.jpg)
 
 Il programma esporterà le annotazioni in formato JSON, generando un file nella sottocartella `vott-json-export`.
 
@@ -59,4 +59,16 @@ Nella directory `reasoner` sono presenti le cartelle:
 E' stato implementato un algoritmo di comparazione dei grafi.
 
 `python utils/graph_comparator.py`
+
+# Training
+Per effettuare il training del dataset elettrocablaggi
+
+`python samples/elettrocablaggi/train.py`
+
+# Prediction
+Per effettuare la previsione su una nuova immagine relativa al dataset elettrocablaggi
+
+`python samples/elettrocablaggi/predict.py`
+
+**Nota:** è necessaria l'immagine in formato .JPG e il file di annotazioni in formato .JSON nella apposita folder (NON è necessario che l'immagine sia annotata, ma deve essere presente almeno il nome dell'immagine corrispondente su cui si vuole fare previsione).
 
