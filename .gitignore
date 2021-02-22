@@ -9,6 +9,7 @@ test/
 images/
 weights/
 facts/
+old_reasoning/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1185,7 +1185,7 @@ def mrcnn_mask_loss_graph(target_masks, target_class_ids, pred_masks):
 
 def load_image_gt(dataset, config, image_id, augment=False, augmentation=None,
                   use_mini_mask=False):
-    """Load and return ground truth data for an image (image, mask, bounding boxes).
+    """Load and return cad data for an image (image, mask, bounding boxes).
 
     augment: (deprecated. Use augmentation instead). If true, apply random
         image augmentation. Currently, only horizontal flipping is offered.
@@ -1324,7 +1324,7 @@ def build_detection_targets(rpn_rois, gt_class_ids, gt_boxes, gt_masks, config):
     gt_boxes = gt_boxes[instance_ids]
     gt_masks = gt_masks[:, :, instance_ids]
 
-    # Compute areas of ROIs and ground truth boxes.
+    # Compute areas of ROIs and cad boxes.
     rpn_roi_area = (rpn_rois[:, 2] - rpn_rois[:, 0]) * \
         (rpn_rois[:, 3] - rpn_rois[:, 1])
     gt_box_area = (gt_boxes[:, 2] - gt_boxes[:, 0]) * \
@@ -1465,7 +1465,7 @@ def build_rpn_targets(image_shape, anchors, gt_class_ids, gt_boxes, config):
     # them from training. A crowd box is given a negative class ID.
     crowd_ix = np.where(gt_class_ids < 0)[0]
     if crowd_ix.shape[0] > 0:
-        # Filter out crowds from ground truth class IDs and boxes
+        # Filter out crowds from cad class IDs and boxes
         non_crowd_ix = np.where(gt_class_ids > 0)[0]
         crowd_boxes = gt_boxes[crowd_ix]
         gt_class_ids = gt_class_ids[non_crowd_ix]
@@ -1559,7 +1559,7 @@ def generate_random_rois(image_shape, count, gt_class_ids, gt_boxes):
 
     image_shape: [Height, Width, Depth]
     count: Number of ROIs to generate
-    gt_class_ids: [N] Integer ground truth class IDs
+    gt_class_ids: [N] Integer cad class IDs
     gt_boxes: [N, (y1, x1, y2, x2)] Ground truth boxes in pixels.
 
     Returns: [count, (y1, x1, y2, x2)] ROI boxes in pixels.

@@ -158,7 +158,7 @@ class NucleusConfig(Config):
     # the RPN NMS threshold.
     TRAIN_ROIS_PER_IMAGE = 128
 
-    # Maximum number of ground truth instances to use in one image
+    # Maximum number of cad instances to use in one image
     MAX_GT_INSTANCES = 200
 
     # Max number of final detections per image

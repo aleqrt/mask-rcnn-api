@@ -10,8 +10,8 @@ from PIL import Image
 path = os.path.join(os.getcwd(), '..', '..', 'images', 'data_augmentation', 'componenti')
 components = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 
-for component in components:
-    img = Image.open(os.path.join(path, component))
+for cmp in components:
+    img = Image.open(os.path.join(path, cmp))
     img = np.array(img.convert("RGBA"))
 
     white = np.sum(img[:, :, :3], axis=2)
@@ -21,4 +21,4 @@ for component in components:
 
     img[:, :, -1] = alpha
     img = Image.fromarray(np.uint8(img))
-    img.save(os.path.join(path, component), "PNG")
+    img.save(os.path.join(path, cmp), "PNG")

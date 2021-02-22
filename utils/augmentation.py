@@ -19,7 +19,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
 
 
-def new_xy_coordinates(region, w, h, key, random_degree):
+def new_xy_coord(region, w, h, key, random_degree):
     """
     NOTA:
         -   res['boundingBox']['left'], contiente la coordinata X del punto in alto a sinistra del bbox
@@ -189,27 +189,27 @@ def classic_augmentation(images_path, annots_path):
             keys = list(available_transformations)
             for key in keys:
                 # read image as an two dimensional array of pixels and read XML annotation
-                image_to_transform = sk.io.imread(os.path.join(images_path, img))
+                temp_img = sk.io.imread(os.path.join(images_path, img))
 
                 new_annot = dict()
                 new_annot['regions'] = list()
 
                 if key == 'rotate90' or key == 'rotate270':
-                    transformed_image, random_degree = available_transformations[key](image_to_transform)
+                    aug_img, random_degree = available_transformations[key](temp_img)
                     height = annot['asset']['size']['width']
                     width = annot['asset']['size']['height']
                 else:
-                    transformed_image = available_transformations[key](image_to_transform)
+                    aug_img = available_transformations[key](temp_img)
                     width = annot['asset']['size']['width']
                     height = annot['asset']['size']['height']
 
                 # generete new annotation for the transformed image
                 for region in annot['regions']:
-                    new_annot['regions'].append(new_xy_coordinates(region, width, height, key, random_degree))
+                    new_annot['regions'].append(new_xy_coord(region, width, height, key, random_degree))
 
                 # write image to the disk
                 new_file_name = 'augmented_image_%s' % tot
-                io.imsave(os.path.join(images_path, new_file_name + '.jpg'), transformed_image)
+                io.imsave(os.path.join(images_path, new_file_name + '.jpg'), aug_img)
 
                 save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
 

@@ -173,8 +173,8 @@ def display_differences(image,
                         class_names, title="", ax=None,
                         show_mask=True, show_box=True,
                         iou_threshold=0.5, score_threshold=0.5):
-    """Display ground truth and prediction instances on the same image."""
-    # Match predictions to ground truth
+    """Display cad and prediction instances on the same image."""
+    # Match predictions to cad
     gt_match, pred_match, overlaps = utils.compute_matches(
         gt_box, gt_class_id, gt_mask,
         pred_box, pred_class_id, pred_score, pred_mask,
@@ -319,7 +319,7 @@ def plot_precision_recall(AP, precisions, recalls):
 
 def plot_overlaps(gt_class_ids, pred_class_ids, pred_scores,
                   overlaps, class_names, threshold=0.5):
-    """Draw a grid showing how ground truth objects are classified.
+    """Draw a grid showing how cad objects are classified.
     gt_class_ids: [N] int. Ground truth class IDs
     pred_class_id: [N] int. Predicted class IDs
     pred_scores: [N] float. The probability scores of predicted classes

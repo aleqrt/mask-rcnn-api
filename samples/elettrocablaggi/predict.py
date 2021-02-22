@@ -1,21 +1,4 @@
-"""
-    L'oggetto component realizzato nelle regole DLV e' caratterizzato come segue
-
-        x1,y1               x2,y2
-            ----------------
-            |              |
-            |              |
-            |              |
-            |              |
-            |              |
-            |              |
-            ----------------
-        x3,y3               x4,y4
-
-
-NOTA:
-    - y2, x2 restituite dalla rete corrispondono a y4, x4 del disegno !!!!!!
-    - TODO: passare da sistema XY di immagini a xy cartesiano per il calcolo delle posizioni con DLV !!!
+"""- TODO: passare da sistema XY di immagini a xy cartesiano per il calcolo delle posizioni con DLV !!!
             Per ora il reasoner calcola correttamente RIGHT e LEFT, ma inverte TOP e BOTTOM.
 
     - class_ids contiene l'indice di dataset_val.class_names corrispondente alla label del componente
@@ -42,7 +25,6 @@ with warnings.catch_warnings():
     ROOT_DIR = os.path.abspath("../../")
     sys.path.append(ROOT_DIR)  # To find local version of the library
     from mrcnn import visualize
-    from mrcnn import utils
     import mrcnn.model as modellib
 
 
@@ -117,58 +99,52 @@ if __name__ == '__main__':
         results = model.detect([original_image], verbose=1)
         r = results[0]
 
-        # draw result of inferred masks on the original image
+        # draw result of net masks on the original image
         fig, ax = get_ax()
         masked_image = visualize.display_instances(original_image, r['rois'], r['masks'], r['class_ids'],
                                                    dataset_val.class_names, r['scores'], ax=ax)
 
         # write the image with bounding boxes and masks to file
         image_name = dataset_val.source_image_link(image_id).split('/')[-1]
-        
+
         # check if directory exist and the file is empty
         p_dir = os.path.join(prediction_dir, "prediction")
         if not os.path.isdir(p_dir):
-            os.mkdir(os.path.join(prediction_dir, "prediction"))
-            
+            os.mkdir(p_dir)
+
         fig.savefig(os.path.join(p_dir, image_name))
         plt.close(fig)
 
         # create file and directory
-        inferred_dir = os.path.join("reasoner", "inferred")
-        file_name = "facts_{}.txt".format(image_name[:-4])
-        dlv_output_name = "output_{}.txt".format(image_name[:-4])
-        dlv_program_name = 'neighborhood.asp'
+        net_dir = os.path.join("reasoner", "net")
+        file_name = "net.asp"
+        dlv_output_name = "output_net.asp"
+        dlv_program_name = 'encoding.asp'
 
         # check if directory exist and the file is empty
-        if not os.path.isdir(inferred_dir):
-            os.mkdir(os.path.join("reasoner", "inferred"))
-        if glob.glob(os.path.join(inferred_dir, file_name)):
-            os.remove(os.path.join(inferred_dir, file_name))
-        if glob.glob(os.path.join(inferred_dir, dlv_output_name)):
-            os.remove(os.path.join(inferred_dir, dlv_output_name))
+        if not os.path.isdir(net_dir):
+            os.mkdir(os.path.join("reasoner", "net"))
+        if glob.glob(os.path.join(net_dir, file_name)):
+            os.remove(os.path.join(net_dir, file_name))
+        if glob.glob(os.path.join(net_dir, dlv_output_name)):
+            os.remove(os.path.join(net_dir, dlv_output_name))
 
         # write facts for DLV reasoner in a txt file
-        with open(os.path.join(inferred_dir, file_name), "a") as f:
+        with open(os.path.join(net_dir, file_name), "a") as f:
             for i in range(r['rois'].shape[0]):
                 # NOTE: READ DESCRIPTION IN TOP OF FILE UNDERSTAND THE COORDINATES OF COMPONENT
-                x3 = int(r['rois'][i, 1])
-                y3 = int(r['rois'][i, 2])
-                x4 = int(r['rois'][i, 3])
-                y4 = int(r['rois'][i, 2])
+                xs = int(min(r['rois'][i, 1], r['rois'][i, 3]))
+                ys = int(min(r['rois'][i, 0], r['rois'][i, 2]))
 
-                x1 = int(r['rois'][i, 1])
-                y1 = int(r['rois'][i, 0])
-                x2 = int(r['rois'][i, 3])
-                y2 = int(r['rois'][i, 0])
+                xd = int(max(r['rois'][i, 1], r['rois'][i, 3]))
+                yd = int(max(r['rois'][i, 0], r['rois'][i, 2]))
 
-                f.write('component("{}",{},{},{},{},{},{},{},{},{}). \n'.format(r['class_ids'][i] - 1, i + 1,
-                                                                                x3, y3,
-                                                                                x4, y4,
-                                                                                x1, y1,
-                                                                                x2, y2))
-        os.system('./{} {} {} --filter=neighbour/5 > {}'
+                f.write('net("{}",{},{},{},{},{}). \n'.format(r['class_ids'][i] - 1, i + 1,
+                                                              xs, ys,
+                                                              xd, yd))
+        os.system('./{} {} {} --filter=posRelNet/5 > {}'
                   .format(os.path.join("reasoner", "dlv2"),
-                          os.path.join(inferred_dir, file_name),
+                          os.path.join(net_dir, file_name),
                           os.path.join("reasoner", "encoding", dlv_program_name),
-                          os.path.join(inferred_dir, dlv_output_name))
+                          os.path.join(net_dir, dlv_output_name))
                   )

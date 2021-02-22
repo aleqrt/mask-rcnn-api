@@ -4,10 +4,9 @@ import glob
 import random
 import string
 import argparse
-import numpy as np
 
 
-def new_xy_coordinates(region, h):
+def new_xy_coord(region, h):
     """
     NOTA:
         -   res['boundingBox']['left'], contiente la coordinata X del punto in alto a sinistra del bbox
@@ -100,7 +99,7 @@ def main(input_folder, output_folder):
                 height = assets[img]['asset']['size']['width']
                 width = assets[img]['asset']['size']['height']
                 for region in assets[img]['regions']:
-                    new_annot['regions'].append(new_xy_coordinates(region, width))
+                    new_annot['regions'].append(new_xy_coord(region, width))
 
             # TODO: parametrizzare la cartella di destinazione nel caso di immagini ruotate da VoTT
             images_path = 'dataset/elettrocablaggi_20200921/GRETA_230V/all/images/'

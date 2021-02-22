@@ -51,8 +51,8 @@ Nella directory `reasoner` sono presenti le cartelle:
 
 - **encoding**: contenente le regole del programma logico
 - **graph**: immagine del risultato del confronto tra i grafi del CAD Reasoner e della rete neurale
-- **ground truth**: contenente il file di fatti e le posizioni relative in output dal CAD Reasoner
-- **inferred**: contenente i fatti e le posizioni relative in output dal modulo di Instance Segmentation
+- **cad**: contenente il file di fatti e le posizioni relative in output dal CAD Reasoner
+- **net**: contenente i fatti e le posizioni relative in output dal modulo di Instance Segmentation
 - **dlv2**: eseguibile del programma dlv2
 
 # Graph Comparator

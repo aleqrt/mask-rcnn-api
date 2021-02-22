@@ -2,7 +2,6 @@ import os
 import re
 import sys
 import warnings
-import argparse
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -13,6 +12,7 @@ with warnings.catch_warnings():
     # Root directory of the project
     ROOT_DIR = os.path.abspath("..")
     sys.path.append(ROOT_DIR)
+
 ################################################################################################################
 
 def get_ax(rows=1, cols=1, size=8):
@@ -27,30 +27,27 @@ def get_ax(rows=1, cols=1, size=8):
     return fig, ax
 
 
-def parser_component(facts_dir, facts_name):
+def parser_component(facts):
     """Parsificatore del file di fatti ASP.
        Return:
-           - component, lista contentente [label, id, x1, y1, x2, y2, x3, y3, x4, y4]
+           - component, lista contentente [Label, Id, Xs1, Ys1, Xd2, Yd2]
     """
     component = []
-    with open(os.path.join(facts_dir, facts_name), 'r') as f:
+    with open(facts, 'r') as f:
         for i, line in enumerate(f):
             cmp = line.split('(')[1].split(')')[0].split(',')
             component.append([cmp[0].replace('\"', ''), int(cmp[1]),
                               int(cmp[2]), int(cmp[3]),
-                              int(cmp[4]), int(cmp[5]),
-                              int(cmp[6]), int(cmp[7]),
-                              int(cmp[8]), int(cmp[9]),
-                              ])
+                              int(cmp[4]), int(cmp[5])])
     return component
 
 
-def parser_neighbour(output_dir, output_name, flag_img=False):
+def parser_neighbour(output_name):
     """Parsificatore del file di output ASP.
        Return:
-           - neighbours, lista contenente [label_1, id_1, label_2, id_2, position]
+           - neighbours, lista contenente [Label1, Id1, Label2, Id2, Position]
     """
-    with open(os.path.join(output_dir, output_name), 'r') as f:
+    with open(output_name, 'r') as f:
         for i, line in enumerate(f):
             if i >= 2:
                 neighbours = [e for e in re.findall('\((.*?)\)', line)]
@@ -61,21 +58,11 @@ def parser_neighbour(output_dir, output_name, flag_img=False):
 
     neighbour = []
     for row in tmp:
-        for col in row:
-            if not flag_img and col == 'left' or col == 'bottom':
-                row[0] = row[0].replace('\"', '')
-                row[1] = int(row[1])
-                row[2] = row[2].replace('\"', '')
-                row[3] = int(row[3])
-                if col == 'bottom':
-                    row[4] = 'top'
-                neighbour.append(row)
-            if flag_img and col == 'left' or col == 'top':
-                row[0] = row[0].replace('\"', '')
-                row[1] = int(row[1])
-                row[2] = row[2].replace('\"', '')
-                row[3] = int(row[3])
-                neighbour.append(row)
+        row[0] = row[0].replace('\"', '')
+        row[1] = int(row[1])
+        row[2] = row[2].replace('\"', '')
+        row[3] = int(row[3])
+        neighbour.append(row)
     return neighbour
 
 
@@ -110,104 +97,121 @@ def checkNodeClass(green, yellow, red, max_score):
 def removeDuplicates(lst):
     return list(set([i for i in lst]))
 
+
 ################################################################################################################
 # Main function
 
-def main(image_name):
+def main():
     """Main function for graph comparator
     """
-    # image_name = '20200921_101722.jpg'
+    resoner_dir = os.path.join("reasoner")
+    graph_dir = os.path.join(resoner_dir, "graph")
+    net_dir = os.path.join(resoner_dir, "net")
+    cad_dir = os.path.join(resoner_dir, "cad")
 
-    facts_name = "facts_{}.txt".format(image_name[:-4])
-    facts_dir = os.path.join("reasoner", "inferred")
+    facts_net = os.path.join(net_dir, "net.asp")
+    output_net = os.path.join(net_dir, "output_net.asp")
 
-    dlv_output_name = "output_{}.txt".format(image_name[:-4])
-    dlv_output_dir = os.path.join("reasoner", "inferred")
-
-    dlv_program_name = 'neighborhood.asp'
-    dlv_program_dir = os.path.join("reasoner", "encoding")
-
-    gt_dir = os.path.join("reasoner", "ground truth")
-    facts_gt = "facts_GRETA230V.txt"
-    output_gt = "output_GRETA230V.txt"
+    facts_cad = os.path.join(cad_dir, "cad.asp")
+    output_cad = os.path.join(cad_dir, "output_cad.asp")
 
     ################################################################################################################
     # Rappresentazione grafo delle componenti riconosciute sull'immagine
+    fig, ax = get_ax()
 
-    comp_inf = parser_component(facts_dir, facts_name)
-    neig_inf = parser_neighbour(dlv_output_dir, dlv_output_name, flag_img=True)
+    comp_net = parser_component(facts_net)
+    neig_net = parser_neighbour(output_net)
 
-    G_inf = nx.Graph()
+    G_net = nx.Graph()
 
-    nodes_inf = [i + 1 for i in range(len(comp_inf))]
-    edge = [(lst[1], lst[3]) for lst in neig_inf]
+    nodes_net = [i + 1 for i in range(len(comp_net))]
+    edge = [(lst[1], lst[3]) for lst in neig_net]
 
-    G_inf.add_nodes_from(nodes_inf)
-    G_inf.add_edges_from(edge)
+    G_net.add_nodes_from(nodes_net)
+    G_net.add_edges_from(edge)
 
-    mapping_inf = {}
-    for e in comp_inf:
-        mapping_inf[e[1]] = e[0]
+    mapping_net = {}
+    for e in comp_net:
+        mapping_net[e[1]] = e[0]
 
     # coordinates for all nodes
-    xy = np.zeros([len(comp_inf), 2])
-    for i, row in enumerate(comp_inf):
-        xy[i, 0] = (comp_inf[i][2] + comp_inf[i][4] + comp_inf[i][6] + comp_inf[i][8]) / 4
-        xy[i, 1] = (comp_inf[i][3] + comp_inf[i][5] + comp_inf[i][7] + comp_inf[i][9]) / 4
+    xy = np.zeros([len(comp_net), 2])
+    for i, row in enumerate(comp_net):
+        xy[i, 0] = (comp_net[i][2] + comp_net[i][4]) / 2
+        xy[i, 1] = (comp_net[i][3] + comp_net[i][5]) / 2
     min_max_scaler = preprocessing.MinMaxScaler()
     xy = min_max_scaler.fit_transform(xy)
     for i, row in enumerate(xy):
         xy[i, 1] = 1 - xy[i, 1]
 
     # position for all nodes
-    pos_inf = {}
-    for i, e in enumerate(comp_inf):
-        pos_inf[e[1]] = xy[i, :]
+    pos_net = {}
+    for i, e in enumerate(comp_net):
+        pos_net[e[1]] = xy[i, :]
+
+    edge_labels_net = {}
+    for e in neig_net:
+        edge_labels_net[e[1], e[3]] = e[4]
+
+    nx.draw_networkx_edge_labels(G_net, pos_net, edge_labels=edge_labels_net, font_color='red')
 
     # draw the graph
-    nx.draw(G_inf, pos_inf, node_color='skyblue')
-    nx.draw_networkx_labels(G_inf, pos_inf, mapping_inf)
-    
+    nx.draw(G_net, pos_net, node_color='skyblue')
+    nx.draw_networkx_labels(G_net, pos_net, mapping_net)
+
+    fig.savefig(os.path.join(graph_dir, "graph_net"))
+    plt.close(fig)
+
     ################################################################################################################
     # Rappresentazione grafo delle componenti riconosciute sul CAD
+    fig, ax = get_ax()
 
-    comp_gt = parser_component(gt_dir, facts_gt)
-    neig_gt = parser_neighbour(gt_dir, output_gt)
+    comp_cad = parser_component(facts_cad)
+    neig_cad = parser_neighbour(output_cad)
 
-    G_gt = nx.Graph()
+    G_cad = nx.Graph()
 
-    nodes_gt = [i + 1 for i in range(len(comp_gt))]
-    edge = [(lst[1], lst[3]) for lst in neig_gt]
+    nodes_cad = [i + 1 for i in range(len(comp_cad))]
+    edge = [(lst[1], lst[3]) for lst in neig_cad]
 
-    G_gt.add_nodes_from(nodes_gt)
-    G_gt.add_edges_from(edge)
+    G_cad.add_nodes_from(nodes_cad)
+    G_cad.add_edges_from(edge)
 
-    mapping_gt = {}
-    for e in comp_gt:
-        mapping_gt[e[1]] = e[0]
+    mapping_cad = {}
+    for e in comp_cad:
+        mapping_cad[e[1]] = e[0]
 
     # coordinates for all nodes
-    xy = np.zeros([len(comp_gt), 2])
-    for i, row in enumerate(comp_gt):
-        xy[i, 0] = (comp_gt[i][2] + comp_gt[i][4] + comp_gt[i][6] + comp_gt[i][8]) / 4
-        xy[i, 1] = (comp_gt[i][3] + comp_gt[i][5] + comp_gt[i][7] + comp_gt[i][9]) / 4
+    xy = np.zeros([len(comp_cad), 2])
+    for i, row in enumerate(comp_cad):
+        xy[i, 0] = (comp_cad[i][2] + comp_cad[i][4]) / 2
+        xy[i, 1] = (comp_cad[i][3] + comp_cad[i][5]) / 2
     min_max_scaler = preprocessing.MinMaxScaler()
     xy = min_max_scaler.fit_transform(xy)
 
     # position for all nodes
-    pos_gt = {}
-    for i, e in enumerate(comp_gt):
-        pos_gt[e[1]] = xy[i, :]
+    pos_cad = {}
+    for i, e in enumerate(comp_cad):
+        pos_cad[e[1]] = xy[i, :]
 
     # draw the graph
-    nx.draw(G_gt, pos_gt, node_color='skyblue')
-    nx.draw_networkx_labels(G_gt, pos_gt, mapping_gt)
-    
+    nx.draw(G_cad, pos_cad, node_color='skyblue')
+    nx.draw_networkx_labels(G_cad, pos_cad, mapping_cad)
+
+    edge_labels = {}
+    for e in neig_cad:
+        edge_labels[e[1], e[3]] = e[4]
+
+    nx.draw_networkx_edge_labels(G_cad, pos_cad, edge_labels=edge_labels, font_color='red')
+
+    fig.savefig(os.path.join(graph_dir, "graph_cad"))
+    plt.close(fig)
+
     ################################################################################################################
     # Algoritmo per il match tra i grafi
 
     th_dist = 0.3
-    th_score = 0.3
+    th_score = 0.8
 
     green_node = []
     yellow_node = []
@@ -218,107 +222,106 @@ def main(image_name):
     max_score = {}
 
     # ciclo su tutti i nodi del grafo CAD
-    for key_gt in mapping_gt:
+    for key_cad in mapping_cad:
 
         # check se esistono nel grafo INF nodi con la stessa label
-        keys = [k for k, v in mapping_inf.items() if v == mapping_gt[key_gt]]
+        keys = [k for k, v in mapping_net.items() if v == mapping_cad[key_cad]]
         if keys:
-            for key_inf in keys:
+            for key_net in keys:
 
                 # valuto la distanza euclidea tra il nodo del grafo CAD e il nodo del grafo INF con la stessa label
-                dist = np.linalg.norm(pos_gt[key_gt] - pos_inf[key_inf])
+                dist = np.linalg.norm(pos_cad[key_cad] - pos_net[key_net])
                 if dist < th_dist:
 
-                    # definisco delle tuple di relazioni dei nodi per entrambi i grafi 
+                    # definisco delle tuple di relazioni dei nodi per entrambi i grafi
                     # schema @ (label_1, label_2, position)
-                    tuple_inf = [(tuple_inf[0], tuple_inf[2], tuple_inf[4]) for tuple_inf in neig_inf if
-                                 (mapping_inf[key_inf] in (tuple_inf[0], tuple_inf[2]))]
-                    tuple_gt = [(tuple_gt[0], tuple_gt[2], tuple_gt[4]) for tuple_gt in neig_gt if
-                                (mapping_gt[key_gt] in (tuple_gt[0], tuple_gt[2]))]
+                    tuple_net = [(tuple_net[0], tuple_net[2], tuple_net[4]) for tuple_net in neig_net if
+                                 (mapping_net[key_net] in (tuple_net[0], tuple_net[2]))]
+                    tuple_cad = [(tuple_cad[0], tuple_cad[2], tuple_cad[4]) for tuple_cad in neig_cad if
+                                 (mapping_cad[key_cad] in (tuple_cad[0], tuple_cad[2]))]
 
                     # verifico che nei due grafi siano presenti le stesse relazioni tra i nodi
                     count = 0
-                    for t_inf in tuple_inf:
-                        if t_inf in tuple_gt:
-                            label_green_edge.append(t_inf)
+                    for t_net in tuple_net:
+                        if t_net in tuple_cad:
+                            label_green_edge.append(t_net)
                             count += 1
-
                     # in base allo score assegno un nodo del grafo INF ad una classe
-                    score = count / len(tuple_gt)
-                    if score > th_score:
-                        max_score[key_gt] = (key_inf, score)
-                        green_node.append(key_gt)
-                    else:
-                        yellow_node.append(key_gt)
+                    try:
+                        score = count / len(tuple_cad)
+                        if score > th_score:
+                            max_score[key_cad] = (key_net, score)
+                            green_node.append(key_cad)
+                        else:
+                            yellow_node.append(key_cad)
+                    except ZeroDivisionError:
+                        print("Il componente {} è isolato".format(mapping_cad[key_cad]))
                 else:
-                    red_node.append(key_gt)
+                    red_node.append(key_cad)
         else:
-            red_node.append(key_gt)
+            red_node.append(key_cad)
 
     green_node = removeDuplicates(green_node)
     yellow_node = removeDuplicates(yellow_node)
     red_node = removeDuplicates(red_node)
 
     yellow_node, red_node = checkNodeClass(green_node, yellow_node, red_node, max_score)
-    
+
     ################################################################################################################
     # Definisco la correttezza delle relazioni tra i nodi nel grafo
 
     # valutazione delle relazioni in base alla label
     label_red_edge = []
-    for tpl in neig_gt:
+    for tpl in neig_cad:
         if (tpl[0], tpl[2], tpl[4]) not in label_green_edge:
             label_red_edge.append((tpl[0], tpl[2], tpl[4]))
 
     # assegnazione di un colore agli archi del grafo in base all'id dei nodi del grafo CAD
     green_edge = []
     for lst1 in label_green_edge:
-        for lst in neig_gt:
+        for lst in neig_cad:
             if lst1[0] == lst[0] and lst1[1] == lst[2] and lst1[2] == lst[4]:
                 green_edge.append((lst[1], lst[3]))
 
     red_edge = []
     for lst1 in label_red_edge:
-        for lst in neig_gt:
+        for lst in neig_cad:
             if lst1[0] == lst[0] and lst1[1] == lst[2] and lst1[2] == lst[4]:
                 red_edge.append((lst[1], lst[3]))
 
     green_edge = removeDuplicates(green_edge)
     red_edge = removeDuplicates(red_edge)
-    
+
     ################################################################################################################
     # Rappresentazione del grafo CAD colorato in base ai nodi e gli archi riconosciuti
 
-    G_gt_col = nx.Graph()
+    G_cad_col = nx.Graph()
 
-    G_gt_col.add_nodes_from(nodes_gt)
-    edge = [(lst[1], lst[3]) for lst in neig_gt]
-    G_gt_col.add_edges_from(edge)
+    G_cad_col.add_nodes_from(nodes_cad)
+    edge = [(lst[1], lst[3]) for lst in neig_cad]
+    G_cad_col.add_edges_from(edge)
 
     fig, ax = get_ax()
 
     # draw the graph
-    nx.draw(G_gt_col, pos_gt)
+    nx.draw(G_cad_col, pos_cad)
 
-    nx.draw_networkx_nodes(G_gt_col, pos_gt, nodelist=green_node, node_color="lightgreen")
-    nx.draw_networkx_nodes(G_gt_col, pos_gt, nodelist=yellow_node, node_color="yellow")
-    nx.draw_networkx_nodes(G_gt_col, pos_gt, nodelist=red_node, node_color="red")
+    nx.draw_networkx_nodes(G_cad_col, pos_cad, nodelist=green_node, node_color="lightgreen")
+    nx.draw_networkx_nodes(G_cad_col, pos_cad, nodelist=yellow_node, node_color="yellow")
+    nx.draw_networkx_nodes(G_cad_col, pos_cad, nodelist=red_node, node_color="red")
 
-    nx.draw_networkx_edges(G_gt_col, pos_gt, edgelist=red_edge, edge_color="red")
-    nx.draw_networkx_edges(G_gt_col, pos_gt, edgelist=green_edge, edge_color="green")
+    nx.draw_networkx_edges(G_cad_col, pos_cad, edgelist=red_edge, edge_color="red")
+    nx.draw_networkx_edges(G_cad_col, pos_cad, edgelist=green_edge, edge_color="green")
 
-    nx.draw_networkx_labels(G_gt_col, pos_gt, mapping_gt)
+    nx.draw_networkx_labels(G_cad_col, pos_cad, mapping_cad)
+    # nx.draw_networkx_edge_labels(G_cad_col, pos_cad, edge_labels=edge_labels, font_color='skyblue')
 
-    fig.savefig(os.path.join("reasoner", "graph", "validation_graph_" + image_name))
+    fig.savefig(os.path.join(graph_dir, "validation_graph"))
     plt.close(fig)
-    
+
+
 ################################################################################################################
 # load files
 
 if __name__ == '__main__':
-    argparser = argparse.ArgumentParser(description='Graph comparator')
-    argparser.add_argument('-i', '--image', help='Image name')
-
-    args = argparser.parse_args()
-
-    main(args.image)
+    main()

@@ -48,7 +48,7 @@ if __name__ == '__main__':
     image_ids = dataset_val.image_ids
     APs = []
     for image_id in image_ids:
-        # Load image and ground truth data
+        # Load image and cad data
         image, image_meta, gt_class_id, gt_bbox, gt_mask = \
             modellib.load_image_gt(dataset_val, inference_config,
                                    image_id, use_mini_mask=False)

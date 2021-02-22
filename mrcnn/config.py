@@ -157,7 +157,7 @@ class Config(object):
     # To change this you also need to change the neural network mask branch
     MASK_SHAPE = [28, 28]
 
-    # Maximum number of ground truth instances to use in one image
+    # Maximum number of cad instances to use in one image
     MAX_GT_INSTANCES = 100
 
     # Bounding box refinement standard deviation for RPN and final detections.
