@@ -87,30 +87,29 @@ def main(input_folder, output_folder):
                 Nel caso in cui VoTT durante la fase di annotazione ruota le immagini di 90° in senso antiorario
                 => commentare
             """
-#             width = assets[img]['asset']['size']['width']
-#             height = assets[img]['asset']['size']['height']
-#             for region in assets[img]['regions']:
-#                 new_annot['regions'].append(region)
+            width = assets[img]['asset']['size']['width']
+            height = assets[img]['asset']['size']['height']
+            for region in assets[img]['regions']:
+                new_annot['regions'].append(region)
 
             """
                 => docommentare
             """
-            if assets[img]['asset']['size']['height'] < assets[img]['asset']['size']['width']:
-                height = assets[img]['asset']['size']['width']
-                width = assets[img]['asset']['size']['height']
-                for region in assets[img]['regions']:
-                    new_annot['regions'].append(new_xy_coord(region, width))
+            # if assets[img]['asset']['size']['height'] < assets[img]['asset']['size']['width']:
+            #     height = assets[img]['asset']['size']['width']
+            #     width = assets[img]['asset']['size']['height']
+            #     for region in assets[img]['regions']:
+            #         new_annot['regions'].append(new_xy_coord(region, width))
 
-            # TODO: parametrizzare la cartella di destinazione nel caso di immagini ruotate da VoTT
-            images_path = 'dataset/elettrocablaggi_20200921/GRETA_230V/all/images/'
+            images_path = 'dataset/elettrocablaggi/<path_to_folder>/images/'
 
             save_annot(new_annot, name, images_path, output_folder, width, height)
 
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Convert annotations from VoTT JSON to file JSON for each image')
-    argparser.add_argument('-o', '--output', help='destination folder for the converted json VOC annotations')
-    argparser.add_argument('-i', '--input', help='path to the collection of JSON VOC annotations')
+    argparser.add_argument('-o', '--output', help='cartella in cui salvare i file in formato .JSON contenente le annotazioni separate per immaigne')
+    argparser.add_argument('-i', '--input', help='path in cui è presente il file EXPORT in formato .JSON generato da VoTT, che continene le annotazioni di tutte le immagini insieme')
 
     args = argparser.parse_args()
 

@@ -1,4 +1,4 @@
-%schema componente(Label, Id, Xs, Ys, Xd, Yd)
+%schema componente(Label, Id, Bottom_Left_Xs, Bottom_Left_Ys, Top_Right_Xd, Top_Right_Yd)
 %schema posizioneRelativa(Label_1, ID_1, Label_2, ID_2, Position)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -71,8 +71,32 @@ noRelCad(X, Id1, Y, Id2) :- not #count{X,Y : posRelCad(X, _, Y, _, _)} >= 1, pos
 %Identifica le relazioni che sono presenti tra due componenti nel CAD ma non nella RETE
 noRelNet(X, Id1, Y, Id2) :- not #count{X,Y : posRelNet(X, _, Y, _, _)} >= 1, posRelCad(X, Id1, Y, Id2, _).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Di seguito N e C fanno riferimento agli ID !!!!!!!
 
-% errorePos(Y, Id) :- posRelCad(X, _, Y, _, _),
-%                    posRelNet(Y, Id, X, _, _), X!=Y.
-% errorePos(X, Id) :- posRelCad(X, _, Y, _, _),
-%                    posRelNet(Y, _, X, Id, _), X!=Y.
+% Identificazione del componente successivo
+succCad(C1, C2):- posRelCad(_, C1, _, C2, _).
+succNet(N1, N2):- posRelNet(_, N1, _, N2, _).
+
+% GUESS di tutti i possibili match tra i grafi
+match(N,C) | nMatch(N,C) :- net(_, N, _, _, _, _),cad(_, C, _, _, _, _).
+
+:- #count{ N : match(N,C) }= 1, cad(_, C, _, _, _, _).
+:- #count{ C : match(N,C) }= 1, net(_, N, _, _, _, _).
+
+
+% Non è possibile che ci sia un match tra due componenti che non abbiano la stessa label
+:- net(L1, N, _, _, _, _), cad(L2,C,  _, _, _, _), match(N,C), L1!=L2.
+
+% Non è possibile che due componenti individuati come successivi e che fanno un match nella RETE non lo siano nel CAD
+% e viceversa
+:- succNet(N1,N2),  not succCad(C1,C2), match(N1,C1), match(N2,C2).
+:- not succNet(N1,N2), succCad(C1,C2), match(N1,C1), match(N2,C2).
+
+erroreNet(N1):- net(N1), not matchAux(N1).
+matchAux(N1):- match(N1,_).
+
+erroreCad(C1):- cad(C1), not matchAuxCad(C1).
+matchAuxCad(C1):- match(_,C1).
+
+:~ nMatch(X,Y). [1@1,X,Y]

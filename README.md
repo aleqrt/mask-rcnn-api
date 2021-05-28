@@ -27,7 +27,7 @@ Il software è basato su tecnologia React, per cui è possibile utilizzarlo tram
 
 Una volta effettuata la procedura di labelling delle immagini, è possibile esportare le annotazioni in vari formati. Scegliamo come Provider "VoTT JSON". 
 
-![Alt Text](https://github.com/AlessandroQuarta/Mask_RCNN/tree/master/assets/vott_export_format.jpg)
+![Alt Text](assets/vott_export_format.jpg)
 
 Il programma esporterà le annotazioni in formato JSON, generando un file nella sottocartella `vott-json-export`.
 
@@ -37,14 +37,24 @@ Fatto ciò, è necessario effettuare una conversione delle annotazioni del file 
 
 Dove <input_folder> è il path alla folder di annotazioni JSON e <output_folder> è il path alla folder in cui lo script salverà le annotazioni delle singole immagini nel formato JSON previsto da Mask-RCNN.
 
-`NOTA: per la conversione delle annotazioni dell'intera immagine o della singola componente seguire le istruzioni contenute nello script`
+**NOTA**
+
+Per la conversione delle annotazioni dell'intera immagine o della singola componente seguire le istruzioni contenute nello script
 
 # Augmentation
-Sono state implementate alcune tecniche di data augmentation che permettono di manipolare le immagini del dataset o di creare immagini sintetiche.
+Sono state implementate alcune tecniche di data augmentation che permettono di manipolare le immagini del dataset e di creare immagini sintetiche.
 
 `python utils/augmentation.py -i <image_folder> -a <annotation_folder>`
 
 `python utils/synthetic_dataset.py -i <image_component_folder> -a <annotation_component_folder>`
+
+**Nota** 
+
+Prima di effettuare l'augmentation eseguire lo script per il mascheramento delle immagini .PNG dei componenti.
+Verificare che il path in cui sono salvate le immagini sia quello presente nello script e nel caso modificarlo.
+
+`python utils/component_definition.py`
+
 
 # Reasoner
 Nella directory `reasoner` sono presenti le cartelle:
@@ -70,5 +80,8 @@ Per effettuare la previsione su una nuova immagine relativa al dataset elettroca
 
 `python samples/elettrocablaggi/predict.py`
 
-**Nota:** è necessaria il file di annotazioni in formato .JSON nella apposita folder (NON è necessario l'annotazione delle componenti, ma deve essere presente almeno il nome dell'immagine su cui si vuole fare previsione).
+**Nota:** inserire il file di annotazione in formato .JSON nella apposita folder 
+- DEVE essere presente il campo NOME dell'immagine
+- NON è necessario l'annotazione delle componenti
+- NON è necessario il path corretto dell'immagine
 

@@ -13,6 +13,7 @@ with warnings.catch_warnings():
     ROOT_DIR = os.path.abspath("..")
     sys.path.append(ROOT_DIR)
 
+
 ################################################################################################################
 
 def get_ax(rows=1, cols=1, size=8):
@@ -44,6 +45,9 @@ def parser_component(facts):
 
 def parser_neighbour(output_name):
     """Parsificatore del file di output ASP.
+        
+       Input:
+           - file contenente il predicato posRelNet oppure posRelCad.
        Return:
            - neighbours, lista contenente [Label1, Id1, Label2, Id2, Position]
     """
@@ -109,11 +113,11 @@ def main():
     net_dir = os.path.join(resoner_dir, "net")
     cad_dir = os.path.join(resoner_dir, "cad")
 
-    facts_net = os.path.join(net_dir, "net.asp")
-    output_net = os.path.join(net_dir, "output_net.asp")
+    facts_net = os.path.join(net_dir, "net.asp")    # File contenente il predicato net
+    output_net = os.path.join(net_dir, "output_net.asp")    # File contenente il predicato posRelNet
 
-    facts_cad = os.path.join(cad_dir, "cad.asp")
-    output_cad = os.path.join(cad_dir, "output_cad.asp")
+    facts_cad = os.path.join(cad_dir, "cad.asp")    # File contenente il predicato cad
+    output_cad = os.path.join(cad_dir, "output_cad.asp")    # File contenente il predicato posRelCad
 
     ################################################################################################################
     # Rappresentazione grafo delle componenti riconosciute sull'immagine

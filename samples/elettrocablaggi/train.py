@@ -10,6 +10,7 @@ with warnings.catch_warnings():
     sys.path.append(ROOT_DIR)  # To find local version of the library
     from mrcnn.model import MaskRCNN
 
+
 if __name__ == '__main__':
     info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/train/annots/labels.txt",
                       'annotation_dir': "dataset/elettrocablaggi_20200921/train/annots/",
@@ -60,15 +61,13 @@ if __name__ == '__main__':
     print("Train network heads")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=100,
+                epochs=150,
                 layers='heads')
 
-    # Fine tune all layers
-    # Passing layers="all" trains all layers. You can also 
-    # pass a regular expression to select which layers to
-    # train by name pattern.
-    # print("Train all layers")
-    # model.train(dataset_train, dataset_val,
-    #             learning_rate=config.LEARNING_RATE,
-    #             epochs=50,
-    #             layers="all")
+    # Fine tune from layers 5+ because GPU used not have sufficient RAM to train all net
+    print("Train layers from 5+")
+    model.train(dataset_train, dataset_val,
+                learning_rate=config.LEARNING_RATE,
+                epochs=100,
+                layers="5+")
+

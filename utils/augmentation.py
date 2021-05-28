@@ -114,7 +114,7 @@ def invert_image(image_array: ndarray):
 
 
 def rescale_intensity(image_array: ndarray):
-    v_min, v_max = np.percentile(image_array, (0.2, 99.8))
+    v_min, v_max = np.percentile(image_array, (0.9, 90))
     return exposure.rescale_intensity(image_array, in_range=(v_min, v_max))
 
 
@@ -180,7 +180,7 @@ def classic_augmentation(images_path, annots_path):
         #     break
 
         try:
-            file = os.path.join(annots_path, annots_name[annots_name.index(img[:-4]+'.json')])
+            file = os.path.join(annots_path, annots_name[annots_name.index(img[:-4] + '.json')])
             f = open(file, encoding='utf-8')
             annot = json.load(f)
 

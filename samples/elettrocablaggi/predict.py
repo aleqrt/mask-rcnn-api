@@ -42,9 +42,9 @@ def get_ax(rows=1, cols=1, size=8):
 
 if __name__ == '__main__':
 
-    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/test/annots/labels.txt",
-                     'annotation_dir': "dataset/elettrocablaggi_20200921/test/real/annots/",
-                     'images_dir': "dataset/elettrocablaggi_20200921/test/real/images/"},
+    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/validation/0A000182537/annots/labels.txt",
+                     'annotation_dir': "dataset/elettrocablaggi_20200921/validation/0A000182537/annots/",
+                     'images_dir': "dataset/elettrocablaggi_20200921/validation/0A000182537/images/"},
             'saved_model_dir': "weights/elettrocablaggi_20200921/"}
 
     inference_config = elettrocablaggi.ElettrocablaggiInferenceConfig()
@@ -117,8 +117,8 @@ if __name__ == '__main__':
 
         # create file and directory
         net_dir = os.path.join("reasoner", "net")
-        file_name = "net.asp"
-        dlv_output_name = "output_net.asp"
+        file_name = "{}_net.asp".format(image_name[:-4])
+        dlv_output_name = "{}_output_net.asp".format(image_name[:-4])
         dlv_program_name = 'encoding.asp'
 
         # check if directory exist and the file is empty
@@ -142,9 +142,10 @@ if __name__ == '__main__':
                 f.write('net("{}",{},{},{},{},{}). \n'.format(r['class_ids'][i] - 1, i + 1,
                                                               xs, ys,
                                                               xd, yd))
-        os.system('./{} {} {} --filter=posRelNet/5 > {}'
-                  .format(os.path.join("reasoner", "dlv2"),
-                          os.path.join(net_dir, file_name),
-                          os.path.join("reasoner", "encoding", dlv_program_name),
-                          os.path.join(net_dir, dlv_output_name))
-                  )
+
+        # os.system('./{} {} {} --filter=posRelNet/5 > {}'
+        #           .format(os.path.join("reasoner", "dlv2"),
+        #                   os.path.join(net_dir, file_name),
+        #                   os.path.join("reasoner", "encoding", dlv_program_name),
+        #                   os.path.join(net_dir, dlv_output_name))
+        #           )

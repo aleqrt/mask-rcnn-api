@@ -7,7 +7,8 @@ import os
 import numpy as np
 from PIL import Image
 
-path = os.path.join(os.getcwd(), '..', '..', 'images', 'data_augmentation', 'componenti')
+ROOT_DIR = os.path.abspath("../../")
+path = os.path.join(ROOT_DIR, 'images', 'data_augmentation', 'images')
 components = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 
 for cmp in components:

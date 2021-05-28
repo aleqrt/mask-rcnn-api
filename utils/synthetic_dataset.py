@@ -1,17 +1,14 @@
 """
 Il seguente script permette la realizzazione di un dataset sintetico.
 
- Il dataset contenete le immagini di background e la cartella dei componenti deve trovarsi al path
+ Il dataset contenete le immagini di background e la cartella con le immagini dei componenti deve trovarsi al path
    - .../[PATH]/data_augmentation/
 
  Il dataset contenete le immagini con i ritagli dei singoli componenti deve trovarsi nella sottocartella
-   - .../[PATH]/data_augmentation/componenti/
+   - .../[PATH]/data_augmentation/images/
 
  Le annotazioni dei singoli componenti si trovano nella sottocartella
-   - .../[PATH]/data_augmentation/componenti_label/vott-json-export/json_singoli_componenti
-
- Il risultato della data augmentation viene salvato nel seguente path:
-   - dataset/elettrocablaggi_20200921/augmentation
+   - .../[PATH]/data_augmentation/annots/vott-json-export/json_singoli_componenti
 """
 
 import argparse
@@ -43,6 +40,10 @@ class Rectangle:
         return True
 
 
+def decision(probability):
+    return random.random() < probability
+
+
 def is_possible(pixel_occupated, x1, y1, w1, h1):
     for i in range(len(pixel_occupated)):
         x2, y2, w2, h2 = pixel_occupated[i, :]
@@ -54,9 +55,9 @@ def is_possible(pixel_occupated, x1, y1, w1, h1):
     return True
 
 
-def random_position(w, h):
-    x = np.random.randint(1, 575 - w)
-    y = np.random.randint(1, 800 - h)
+def random_position(W, H, w, h):
+    x = np.random.randint(1, W - w)
+    y = np.random.randint(1, H - h)
     return x, y
 
 
@@ -91,35 +92,28 @@ def main(images_path, annots_path):
     """
     Main function for data augmentation.
     Params:
-        - images_path: path in which are images for data augmentation. Must be contain 'componenti' folder in
-                        which is stored images for each component.
-        - annots_path: path in which are annotation in .json
+        - images_path:  path in which are images in .PNG
 
-    Returns:
-        - new images in 'dataset/elettrocabalaggi_20200921/augmentation' folder
-        - new annotation in 'dataset/elettrocabalaggi_20200921/annotation' folder
-
-        NOTE:
-            create data_augmentation folder in images_path and annots_path folders
-
+        - annots_path: path in which are annotation in .JSON
     """
     annots = [f for f in os.listdir(annots_path) if os.path.isfile(os.path.join(annots_path, f))]
 
-    components_path = os.path.join(images_path, 'componenti')
+    components_path = os.path.join(images_path, 'images')
     backgrounds = [os.path.join(images_path, f) for f in os.listdir(images_path) if
                    os.path.isfile(os.path.join(images_path, f))]
     components = [f for f in os.listdir(components_path) if os.path.isfile(os.path.join(components_path, f))]
 
     tot = 0
-    max_count = 7820
+    max_count = 10000
 
     for background in backgrounds:
         background = Image.open(background)
         count = 0
 
-        while count < max_count / len(backgrounds):
+        while count < max_count:
             # creo una copia dello sfondo su cui aggiungere le componenti random
             background_copy = background.copy()
+            W, H = background_copy.size
 
             # utilizzo un array di supporto per verificare che la posizione nell'img sia disponibile per aggiungere un componente
             pixel_occupated = np.zeros([len(components), 4], dtype=int)
@@ -128,7 +122,11 @@ def main(images_path, annots_path):
             new_annot['regions'] = list()
             ind = 0
 
-            for component in components:
+            # selezione random in modo da evitare bias verso i primi componenti della lista
+            num_comp = 30
+            comps = random.sample(components, num_comp)
+
+            for component in comps:
                 comp = Image.open(os.path.join(components_path, component))
 
                 # Decommentare la riga seguente per avere le immagini BLUR dei singoli componenti
@@ -139,7 +137,7 @@ def main(images_path, annots_path):
 
                 # Ciclo (per un massimo di 1000 volte) per l'inserimento di un componente senza overlap con gli altri
                 for i in range(1000):
-                    x, y = random_position(w, h)
+                    x, y = random_position(W, H, w, h)
 
                     # verifico se è possibile aggiungere un nuovo componente NON sovrapposto
                     if is_possible(pixel_occupated, x, y, w, h):
@@ -160,7 +158,7 @@ def main(images_path, annots_path):
                         break
 
             # split train e test set
-            if count <= 0.35*max_count:
+            if decision(0.3):
                 destination_dir_images = 'dataset/elettrocablaggi_20200921/test/images/'
                 destination_dir_annots = 'dataset/elettrocablaggi_20200921/test/annots/'
             else:
@@ -180,7 +178,7 @@ def main(images_path, annots_path):
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Data augmentation script')
     argparser.add_argument('-a', '--annots', help='folder path of json VOC annotations of single component')
-    argparser.add_argument('-i', '--images', help='folder path of images of backgrounds and components')
+    argparser.add_argument('-i', '--images', help='folder path in which are images, annots and backgrounds')
 
     args = argparser.parse_args()
 

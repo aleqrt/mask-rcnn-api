@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 
 
@@ -16,15 +17,18 @@ def parser_component(facts_name):
     return component
 
 
-facts = parser_component('cad.asp')
-df = pd.read_excel('registro_componenti.xlsx', sheet_name='ECB_Distinta SEF Articoli ', engine='openpyxl')
-
-desc = df['DESCRIZIONE']
+facts = parser_component(os.path.join('reasoner', 'cad', 'cad.asp'))
+df = pd.read_excel(os.path.join('utils', 'registro_componenti.xlsx'), sheet_name='ECB_Distinta SEF Articoli '
+                   , engine='openpyxl')
 sef = df['SEF']
 
+# Se le label nel file cad.asp sono corrispondenti a valori alfanumerici delle colonna SEF del file excel allora
+# mostro la corrispondente descrizione del componente così da poter fare un match con l'output della rete neurale
 cod = [c[0] for c in facts]
-
-for id, label in sef.items():
+for j, label in sef.items():
     if label in cod:
-        print(f'Componente con label {label} e descrizione {desc[id]} presente')
+        print(f"Componente con label {label} e descrizione {df['DESCRIZIONE'][j]} presente")
 
+# Per ogni componente la tupla formata da DESCRIZIONE, NUMERO ARTICOLO, FORNITORE lo identifica univocamente
+tpl = [(df['DESCRIZIONE'][i], df['NUMERO ARTICOLO'][i], df['FORNITORE'][i]) for i in range(df.shape[0])]
+print(*tpl, sep="\n")

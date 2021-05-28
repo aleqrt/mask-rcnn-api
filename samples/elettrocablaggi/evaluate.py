@@ -61,5 +61,7 @@ if __name__ == '__main__':
             utils.compute_ap(gt_bbox, gt_class_id, gt_mask,
                              r["rois"], r["class_ids"], r["scores"], r['masks'])
         APs.append(AP)
+        print("Immagine {} ha AP: {}".format(image_id, AP))
 
-    print("mAP: ", np.mean(APs))
+    print("Media di AP su dataset di test. mAP: ", np.mean(APs))
+    print("Varianza di AP su dataset di test. var(AP): ", np.var(APs))
