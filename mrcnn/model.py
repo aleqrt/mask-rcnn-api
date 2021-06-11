@@ -2339,8 +2339,9 @@ class MaskRCNN():
         callbacks = [
             keras.callbacks.TensorBoard(log_dir=self.log_dir,
                                         histogram_freq=0, write_graph=True, write_images=False),
-            keras.callbacks.ModelCheckpoint(self.checkpoint_path,
+            keras.callbacks.ModelCheckpoint(self.checkpoint_path, monitor='val_accuracy',
                                             verbose=0, save_weights_only=True),
+            keras.callbacks.CSVLogger(os.path.join(self.log_dir, "mask_rcnn.csv"), separator=",", append=False),
         ]
 
         # Add custom callbacks to the list

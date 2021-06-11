@@ -1,4 +1,4 @@
-h5py
+h5py==2.10.0
 scipy
 imgaug
 pandas
@@ -14,6 +14,8 @@ keras==2.0.8
 numpy==1.19.3
 tensorflow==1.15
 scikit-image==0.16.2
+opencv-python==3.4.2.17
+opencv-contrib-python==3.4.2.17
 
 
 

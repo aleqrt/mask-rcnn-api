@@ -18,7 +18,7 @@ def parser_component(facts_name):
 
 
 facts = parser_component(os.path.join('reasoner', 'cad', 'cad.asp'))
-df = pd.read_excel(os.path.join('utils', 'registro_componenti.xlsx'), sheet_name='ECB_Distinta SEF Articoli '
+df = pd.read_excel(os.path.join('utils', 'data', 'registro_componenti.xlsx'), sheet_name='ECB_Distinta SEF Articoli '
                    , engine='openpyxl')
 sef = df['SEF']
 

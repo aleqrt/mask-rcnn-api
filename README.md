@@ -56,6 +56,20 @@ Verificare che il path in cui sono salvate le immagini sia quello presente nello
 `python utils/component_definition.py`
 
 
+# Auto-labeling
+Per velocizzare il processo di etichettatura del dataset è stato utilizzato un algoritmo di image processing SIFT
+mediante il quale è possibile ricavare la matrice Omografica a partire da due immagini che rappresentano lo stesso oggetto 
+ma da diverse angolazioni.
+Poichè il dataset per il training del modello Mask-RCNN è ottenuto da immagini di un pannello ottenute da diverse angolazioni,
+è possibile utilizzare lo script `image_sift.py` per etichettare tutte le immagini a partire da un immagine etichettata 
+come riferimento.
+
+`python utils/component_definition.py
+-a <path_to_annotation>/annots/ 
+-i <path_to_dataset>/images/ 
+-w <path_to_warp_dir>/warp_images/`
+
+
 # Reasoner
 Nella directory `reasoner` sono presenti le cartelle:
 

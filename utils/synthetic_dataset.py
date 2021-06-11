@@ -73,7 +73,7 @@ def new_annotation(regions, x, y):
 
 
 def save_annot(new_annot, new_file_name, destination_dir_images, destination_dir_annots, background_copy):
-    new_annot['asset'] = {"format": "png",
+    new_annot['asset'] = {"format": "JPG",
                            "id": ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)),
                            "name": new_file_name + '.jpg',
                            "path": destination_dir_images + new_file_name + '.jpg',
@@ -92,7 +92,7 @@ def main(images_path, annots_path):
     """
     Main function for data augmentation.
     Params:
-        - images_path:  path in which are images in .PNG
+        - images_path:  path in which are images in .PNG or .JPG
 
         - annots_path: path in which are annotation in .JSON
     """
@@ -104,7 +104,7 @@ def main(images_path, annots_path):
     components = [f for f in os.listdir(components_path) if os.path.isfile(os.path.join(components_path, f))]
 
     tot = 0
-    max_count = 10000
+    max_count = 1000
 
     for background in backgrounds:
         background = Image.open(background)
@@ -123,7 +123,7 @@ def main(images_path, annots_path):
             ind = 0
 
             # selezione random in modo da evitare bias verso i primi componenti della lista
-            num_comp = 30
+            num_comp = 10
             comps = random.sample(components, num_comp)
 
             for component in comps:
@@ -159,11 +159,11 @@ def main(images_path, annots_path):
 
             # split train e test set
             if decision(0.3):
-                destination_dir_images = 'dataset/elettrocablaggi_20200921/test/images/'
-                destination_dir_annots = 'dataset/elettrocablaggi_20200921/test/annots/'
+                destination_dir_images = 'dataset/elettrocablaggi_20200921/0A00018253.04/test/images/'
+                destination_dir_annots = 'dataset/elettrocablaggi_20200921/0A00018253.04/test/annots/'
             else:
-                destination_dir_images = 'dataset/elettrocablaggi_20200921/train/images/'
-                destination_dir_annots = 'dataset/elettrocablaggi_20200921/train/annots/'
+                destination_dir_images = 'dataset/elettrocablaggi_20200921/0A00018253.04/train/images/'
+                destination_dir_annots = 'dataset/elettrocablaggi_20200921/0A00018253.04/train/annots/'
 
             new_file_name = 'synthetic_image_%s' % tot
             tot += 1

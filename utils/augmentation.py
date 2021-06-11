@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 from scipy import ndarray
 import skimage as sk
-from skimage import transform
+from skimage import transform, color
 from skimage import filters
 from skimage import io
 from skimage.util import random_noise
@@ -127,7 +127,7 @@ def sigmoid_correction(image_array: ndarray):
 
 
 def save_annot(new_annot, new_file_name, images_path, annots_path, width, height):
-    new_annot['asset'] = {"format": "png",
+    new_annot['asset'] = {"format": "JPG",
                           "id": ''.join(
                               random.choice(string.ascii_uppercase + string.digits) for _ in range(10)),
                           "name": new_file_name + '.jpg',
@@ -189,7 +189,7 @@ def classic_augmentation(images_path, annots_path):
             keys = list(available_transformations)
             for key in keys:
                 # read image as an two dimensional array of pixels and read XML annotation
-                temp_img = sk.io.imread(os.path.join(images_path, img))
+                temp_img = io.imread(os.path.join(images_path, img))
 
                 new_annot = dict()
                 new_annot['regions'] = list()
@@ -209,9 +209,9 @@ def classic_augmentation(images_path, annots_path):
 
                 # write image to the disk
                 new_file_name = 'augmented_image_%s' % tot
-                io.imsave(os.path.join(images_path, new_file_name + '.jpg'), aug_img)
-
+                io.imsave(os.path.join(images_path, new_file_name + '.jpg'), (aug_img*255).astype(np.uint8))
                 save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
+                print(new_file_name + " OK!")
 
                 # Incremento contatore per il numero di immagini soggette a trasformazioni
                 tot += 1
