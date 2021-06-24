@@ -101,7 +101,7 @@ def main(imgs_dir, annotation_dir, warp_images):
             # ensure the distance is within a certain ratio of each
             # other (i.e. Lowe's ratio test)
             if m.distance < n.distance * ratio:
-                good.append(m)
+                good += [m]
         matches = np.asarray(good)
 
         # matches.shape
