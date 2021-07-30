@@ -58,7 +58,7 @@ def parser_neighbour(output_name):
 
     tmp = []
     for e in neighbours:
-        tmp.append((e.split(',')))
+        tmp.append(e.split(','))
 
     neighbour = []
     for row in tmp:
@@ -248,22 +248,22 @@ def main():
                     count = 0
                     for t_net in tuple_net:
                         if t_net in tuple_cad:
-                            label_green_edge += [t_net]
+                            label_green_edge.append(t_net)
                             count += 1
                     # in base allo score assegno un nodo del grafo INF ad una classe
                     try:
                         score = count / len(tuple_cad)
                         if score > th_score:
                             max_score[key_cad] = (key_net, score)
-                            green_node += [key_cad]
+                            green_node.append(key_cad)
                         else:
-                            yellow_node += [key_cad]
+                            yellow_node.append(key_cad)
                     except ZeroDivisionError:
                         print("Il componente {} è isolato".format(mapping_cad[key_cad]))
                 else:
-                    red_node += [key_cad]
+                    red_node.append(key_cad)
         else:
-            red_node += [key_cad]
+            red_node.append(key_cad)
 
     green_node = removeDuplicates(green_node)
     yellow_node = removeDuplicates(yellow_node)
@@ -278,20 +278,20 @@ def main():
     label_red_edge = []
     for tpl in neig_cad:
         if (tpl[0], tpl[2], tpl[4]) not in label_green_edge:
-            label_red_edge += [(tpl[0], tpl[2], tpl[4])]
+            label_red_edge.append((tpl[0], tpl[2], tpl[4]))
 
     # assegnazione di un colore agli archi del grafo in base all'id dei nodi del grafo CAD
     green_edge = []
     for lst1 in label_green_edge:
         for lst in neig_cad:
             if lst1[0] == lst[0] and lst1[1] == lst[2] and lst1[2] == lst[4]:
-                green_edge += [(lst[1], lst[3])]
+                green_edge.append((lst[1], lst[3]))
 
     red_edge = []
     for lst1 in label_red_edge:
         for lst in neig_cad:
             if lst1[0] == lst[0] and lst1[1] == lst[2] and lst1[2] == lst[4]:
-                red_edge += [(lst[1], lst[3])]
+                red_edge.append((lst[1], lst[3]))
 
     green_edge = removeDuplicates(green_edge)
     red_edge = removeDuplicates(red_edge)
