@@ -42,9 +42,9 @@ def get_ax(rows=1, cols=1, size=8):
 
 if __name__ == '__main__':
 
-    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/validation/0A000182537/annots/labels.txt",
-                     'annotation_dir': "dataset/elettrocablaggi_20200921/validation/0A000182537/annots/",
-                     'images_dir': "dataset/elettrocablaggi_20200921/validation/0A000182537/images/"},
+    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/0A00018253.04/test/annots/labels.txt",
+                     'annotation_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/test/annots/",
+                     'images_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/test/images/"},
             'saved_model_dir': "weights/elettrocablaggi_20200921/"}
 
     inference_config = elettrocablaggi.ElettrocablaggiInferenceConfig()
@@ -143,9 +143,9 @@ if __name__ == '__main__':
                                                               xs, ys,
                                                               xd, yd))
 
-        # os.system('./{} {} {} --filter=posRelNet/5 > {}'
-        #           .format(os.path.join("reasoner", "dlv2"),
-        #                   os.path.join(net_dir, file_name),
-        #                   os.path.join("reasoner", "encoding", dlv_program_name),
-        #                   os.path.join(net_dir, dlv_output_name))
-        #           )
+        os.system('./{} {} {} --filter=posRelNet/5 > {}'
+                  .format(os.path.join("reasoner", "dlv2"),
+                          os.path.join(net_dir, file_name),
+                          os.path.join("reasoner", "encoding", dlv_program_name),
+                          os.path.join(net_dir, dlv_output_name))
+                  )

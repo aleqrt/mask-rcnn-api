@@ -1,0 +1,32 @@
+DLV 2.0
+
+{posRelCad("20",10,"21",11,left), 
+posRelCad("18",6,"18",7,left), 
+posRelCad("13",1,"14",2,left), 
+posRelCad("22",12,"23",13,left), 
+posRelCad("21",11,"22",12,left), 
+posRelCad("15",3,"16",4,left), 
+posRelCad("25",15,"25",16,left), 
+posRelCad("19",8,"19",9,left), 
+posRelCad("14",2,"15",3,left), 
+posRelCad("16",4,"17",5,left), 
+posRelCad("23",13,"25",15,left), 
+posRelCad("13",0,"13",1,left), 
+posRelCad("19",9,"20",10,left), 
+posRelCad("18",7,"19",8,left), 
+posRelNet("13",11,"14",5,left), 
+posRelNet("22",8,"23",10,left), 
+posRelNet("13",16,"13",11,left), 
+posRelNet("25",15,"25",17,left), 
+posRelNet("15",13,"16",9,left), 
+posRelNet("19",4,"19",6,left), 
+posRelNet("21",12,"22",8,left), 
+posRelNet("16",9,"17",1,left), 
+posRelNet("18",3,"18",7,left), 
+posRelNet("14",5,"15",13,left), 
+posRelNet("19",6,"20",2,left), 
+posRelNet("23",10,"25",15,left), 
+posRelNet("20",2,"21",12,left), 
+posRelNet("18",7,"19",4,left)}
+COST 289@1
+OPTIMUM

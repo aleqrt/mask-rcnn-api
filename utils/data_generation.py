@@ -104,7 +104,7 @@ def main(images_path, annots_path):
     components = [f for f in os.listdir(components_path) if os.path.isfile(os.path.join(components_path, f))]
 
     tot = 0
-    max_count = 1000
+    max_count = 2000
 
     for background in backgrounds:
         background = Image.open(background)
@@ -123,7 +123,7 @@ def main(images_path, annots_path):
             ind = 0
 
             # selezione random in modo da evitare bias verso i primi componenti della lista
-            num_comp = 10
+            num_comp = 20
             comps = random.sample(components, num_comp)
 
             for component in comps:

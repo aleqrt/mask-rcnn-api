@@ -44,9 +44,9 @@ Per la conversione delle annotazioni dell'intera immagine o della singola compon
 # Augmentation
 Sono state implementate alcune tecniche di data augmentation che permettono di manipolare le immagini del dataset e di creare immagini sintetiche.
 
-`python utils/augmentation.py -i <image_folder> -a <annotation_folder>`
+`python utils/data_augmentation.py -i <image_folder> -a <annotation_folder>`
 
-`python utils/synthetic_dataset.py -i <image_component_folder> -a <annotation_component_folder>`
+`python utils/data_generation.py -i <image_component_folder> -a <annotation_component_folder>`
 
 **Nota** 
 
@@ -80,7 +80,17 @@ Nella directory `reasoner` sono presenti le cartelle:
 - **dlv2**: eseguibile del programma dlv2
 
 # Graph Comparator
+Per la compliance dei grafi utilizzare il programma logico *encoding.asp*
+
+`   ./reasoner/dlv2 
+    reasoner/net/<file_net.asp> 
+    reasoner/cad/<file_cad.asp>  
+    reasoner/encoding/encoding.asp 
+    --filter=posRelNet/5,posRelCad/5,compNonPresente/1,compInEccesso/1,erroreNet/1,erroreCad/1
+    > reasoner/graph/<file_compliance.asp>`
+
 E' stato implementato un algoritmo di comparazione dei grafi.
+(TODO: fare dei fix perchè in alcuni casi non permette la visualizzazione)
 
 `python utils/graph_comparator.py`
 

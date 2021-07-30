@@ -14,9 +14,9 @@ with warnings.catch_warnings():
 
 if __name__ == '__main__':
 
-    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/test/annots/labels.txt",
-                     'annotation_dir': "dataset/elettrocablaggi_20200921/test/annots/",
-                     'images_dir': "dataset/elettrocablaggi_20200921/test/images/"},
+    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/0A00018253.04/test/annots/labels.txt",
+                     'annotation_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/test/annots/",
+                     'images_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/test/images/"},
             'saved_model_dir': "weights/elettrocablaggi_20200921/"}
 
     inference_config = elettrocablaggi.ElettrocablaggiInferenceConfig()
@@ -57,11 +57,13 @@ if __name__ == '__main__':
         results = model.detect([image], verbose=0)
         r = results[0]
         # Compute AP
-        AP, precisions, recalls, overlaps = \
+        AP, precision, recall, overlap = \
             utils.compute_ap(gt_bbox, gt_class_id, gt_mask,
                              r["rois"], r["class_ids"], r["scores"], r['masks'])
         APs.append(AP)
-        print("Immagine {} ha AP: {}".format(image_id, AP))
+        print("Imagine {} - AP: {}".format(image_id, AP))
 
-    print("Media di AP su dataset di test. mAP: ", np.mean(APs))
-    print("Varianza di AP su dataset di test. var(AP): ", np.var(APs))
+    print("########## Evaluation on test dataset ##########")
+    print("mAP: ", np.mean(APs))
+    print("var(AP): ", np.var(APs))
+    print("Best AP: ", max(APs), " at Image: ", APs.index(max(APs)))

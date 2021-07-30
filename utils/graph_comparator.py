@@ -37,9 +37,9 @@ def parser_component(facts):
     with open(facts, 'r') as f:
         for i, line in enumerate(f):
             cmp = line.split('(')[1].split(')')[0].split(',')
-            component += [cmp[0].replace('\"', ''), int(cmp[1]),
+            component.append([cmp[0].replace('\"', ''), int(cmp[1]),
                               int(cmp[2]), int(cmp[3]),
-                              int(cmp[4]), int(cmp[5])]
+                              int(cmp[4]), int(cmp[5])])
     return component
 
 
@@ -58,7 +58,7 @@ def parser_neighbour(output_name):
 
     tmp = []
     for e in neighbours:
-        tmp += [(e.split(','))]
+        tmp.append((e.split(',')))
 
     neighbour = []
     for row in tmp:
@@ -66,7 +66,7 @@ def parser_neighbour(output_name):
         row[1] = int(row[1])
         row[2] = row[2].replace('\"', '')
         row[3] = int(row[3])
-        neighbour += [row]
+        neighbour.append(row)
     return neighbour
 
 
@@ -113,11 +113,11 @@ def main():
     net_dir = os.path.join(resoner_dir, "net")
     cad_dir = os.path.join(resoner_dir, "cad")
 
-    facts_net = os.path.join(net_dir, "net.asp")    # File contenente il predicato net
-    output_net = os.path.join(net_dir, "output_net.asp")    # File contenente il predicato posRelNet
+    facts_net = os.path.join(net_dir, "IMG_4416_warp_net.asp")  # File contenente il predicato net
+    output_net = os.path.join(net_dir, "IMG_4416_warp_output_net.asp")  # File contenente il predicato posRelNet
 
-    facts_cad = os.path.join(cad_dir, "cad.asp")    # File contenente il predicato cad
-    output_cad = os.path.join(cad_dir, "output_cad.asp")    # File contenente il predicato posRelCad
+    facts_cad = os.path.join(cad_dir, "0A00018253.04_cad.asp")  # File contenente il predicato cad
+    output_cad = os.path.join(cad_dir, "0A00018253.04_output_cad.asp")  # File contenente il predicato posRelCad
 
     ################################################################################################################
     # Rappresentazione grafo delle componenti riconosciute sull'immagine

@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 from scipy import ndarray
 import skimage as sk
-from skimage import transform, color
+from skimage import transform
 from skimage import filters
 from skimage import io
 from skimage.util import random_noise

@@ -65,9 +65,9 @@ if __name__ == '__main__':
                 layers='heads')
 
     # Fine tune from layers 5+ because GPU used not have sufficient RAM to train all net
-    print("Train layers from 5+")
-    model.train(dataset_train, dataset_val,
-                learning_rate=config.LEARNING_RATE,
-                epochs=100,
-                layers="5+")
+    # print("Train layers from 5+")
+    # model.train(dataset_train, dataset_val,
+    #             learning_rate=config.LEARNING_RATE,
+    #             epochs=100,
+    #             layers="5+")
 
