@@ -86,11 +86,10 @@ Per la compliance dei grafi utilizzare il programma logico *encoding.asp*
     reasoner/net/<file_net.asp> 
     reasoner/cad/<file_cad.asp>  
     reasoner/encoding/encoding.asp 
-    --filter=posRelNet/5,posRelCad/5,compNonPresente/1,compInEccesso/1,erroreNet/1,erroreCad/1
+    --filter=posRelNet/5,posRelCad/5,compNonPresente/2,compInEccesso/2,noRelCad/4,noRelNet/4
     > reasoner/graph/<file_compliance.asp>`
 
 E' stato implementato un algoritmo di comparazione dei grafi.
-(TODO: fare dei fix perchè in alcuni casi non permette la visualizzazione)
 
 `python utils/graph_comparator.py`
 

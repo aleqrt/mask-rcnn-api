@@ -108,10 +108,10 @@ def removeDuplicates(lst):
 def main():
     """Main function for graph comparator
     """
-    resoner_dir = os.path.join("reasoner")
-    graph_dir = os.path.join(resoner_dir, "graph")
-    net_dir = os.path.join(resoner_dir, "net")
-    cad_dir = os.path.join(resoner_dir, "cad")
+    reasoner_dir = os.path.join("reasoner")
+    graph_dir = os.path.join(reasoner_dir, "graph")
+    net_dir = os.path.join(reasoner_dir, "net")
+    cad_dir = os.path.join(reasoner_dir, "cad")
 
     facts_net = os.path.join(net_dir, "IMG_4416_warp_net.asp")  # File contenente il predicato net
     output_net = os.path.join(net_dir, "IMG_4416_warp_output_net.asp")  # File contenente il predicato posRelNet
@@ -143,8 +143,13 @@ def main():
     for i, row in enumerate(comp_net):
         xy[i, 0] = (comp_net[i][2] + comp_net[i][4]) / 2
         xy[i, 1] = (comp_net[i][3] + comp_net[i][5]) / 2
+
+    # scaling coordinates between 0-1
     min_max_scaler = preprocessing.MinMaxScaler()
     xy = min_max_scaler.fit_transform(xy)
+
+    # effettua cambio di coordinate in modo che
+    # il punto in basso a sinistra dell'immagine sia il punto (0,0)
     for i, row in enumerate(xy):
         xy[i, 1] = 1 - xy[i, 1]
 
@@ -190,13 +195,25 @@ def main():
     for i, row in enumerate(comp_cad):
         xy[i, 0] = (comp_cad[i][2] + comp_cad[i][4]) / 2
         xy[i, 1] = (comp_cad[i][3] + comp_cad[i][5]) / 2
+
+    # scaling coordinates between 0-1
     min_max_scaler = preprocessing.MinMaxScaler()
     xy = min_max_scaler.fit_transform(xy)
+
+    # effettua cambio di coordinate in modo che
+    # il punto in basso a sinistra dell'immagine sia il punto (0,0)
+    # Commentare nel caso in cui il fila ASP ottenuto dal cad non sia realizzato dal tool grafico
+    for i, row in enumerate(xy):
+        xy[i, 1] = 1 - xy[i, 1]
 
     # position for all nodes
     pos_cad = {}
     for i, e in enumerate(comp_cad):
         pos_cad[e[1]] = xy[i, :]
+
+    # con l'utilizzo del file ASP ottenuto dal tool grafico, viene aggiunto il nodo 0
+    if G_cad.has_node(0):
+        G_cad.remove_node(0)
 
     # draw the graph
     nx.draw(G_cad, pos_cad, node_color='skyblue')
@@ -259,6 +276,7 @@ def main():
                         else:
                             yellow_node.append(key_cad)
                     except ZeroDivisionError:
+                        green_node.append(key_cad)
                         print("Il componente {} è isolato".format(mapping_cad[key_cad]))
                 else:
                     red_node.append(key_cad)
@@ -296,6 +314,15 @@ def main():
     green_edge = removeDuplicates(green_edge)
     red_edge = removeDuplicates(red_edge)
 
+    # rimozione degli archi che interessano il nodo 0
+    for lst in green_edge:
+        if 0 in lst:
+            green_edge.remove(lst)
+
+    for lst in red_edge:
+        if 0 in lst:
+            red_edge.remove(lst)
+
     ################################################################################################################
     # Rappresentazione del grafo CAD colorato in base ai nodi e gli archi riconosciuti
 
@@ -307,17 +334,20 @@ def main():
 
     fig, ax = get_ax()
 
+    if G_cad_col.has_node(0):
+        G_cad_col.remove_node(0)
+
     # draw the graph
     nx.draw(G_cad_col, pos_cad)
+    nx.draw_networkx_labels(G_cad_col, pos_cad, mapping_cad)
 
     nx.draw_networkx_nodes(G_cad_col, pos_cad, nodelist=green_node, node_color="lightgreen")
     nx.draw_networkx_nodes(G_cad_col, pos_cad, nodelist=yellow_node, node_color="yellow")
     nx.draw_networkx_nodes(G_cad_col, pos_cad, nodelist=red_node, node_color="red")
 
-    nx.draw_networkx_edges(G_cad_col, pos_cad, edgelist=red_edge, edge_color="red")
     nx.draw_networkx_edges(G_cad_col, pos_cad, edgelist=green_edge, edge_color="green")
+    nx.draw_networkx_edges(G_cad_col, pos_cad, edgelist=red_edge, edge_color="red")
 
-    nx.draw_networkx_labels(G_cad_col, pos_cad, mapping_cad)
     # nx.draw_networkx_edge_labels(G_cad_col, pos_cad, edge_labels=edge_labels, font_color='skyblue')
 
     fig.savefig(os.path.join(graph_dir, "validation_graph"))

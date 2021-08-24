@@ -56,13 +56,14 @@ inLevelNet(C1, ID1, C2, ID2, horizontal) :-     net(C1, ID1, Xs1, Ys1, Xd1, Yd1)
                                                 Ys1 <= Yd2, Yd1 >= Ys2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TODO: fix di netAux e cadAux per avere label e id.
 
 %Componenti che sono presenti nel CAD ma non nella RETE
-compNonPresente(X) :- cad(X, _, _, _, _, _), not netAux(X).
+compNonPresente(X, Id) :- cad(X, Id, _, _, _, _), not netAux(X).
 netAux(X) :- net(X, _, _, _, _, _).
 
 %Componenti che sono presenti nella RETE ma non nel CAD
-compInEccesso(X) :- net(X, _, _, _, _, _), not cadAux(X).
+compInEccesso(X, Id) :- net(X, Id, _, _, _, _), not cadAux(X).
 cadAux(X) :- cad(X, _, _, _, _, _).
 
 %Identifica le relazioni che sono presenti tra due componenti nella RETE ma non nel CAD
@@ -72,6 +73,8 @@ noRelCad(X, Id1, Y, Id2) :- not #count{X,Y : posRelCad(X, _, Y, _, _)} >= 1, pos
 noRelNet(X, Id1, Y, Id2) :- not #count{X,Y : posRelNet(X, _, Y, _, _)} >= 1, posRelCad(X, Id1, Y, Id2, _).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TODO: fix per erroreCad e erroreNet
+
 % Di seguito N e C fanno riferimento agli ID !!!!!!!
 
 % Identificazione del componente successivo
@@ -88,15 +91,16 @@ match(N,C) | nMatch(N,C) :- net(_, N, _, _, _, _),cad(_, C, _, _, _, _).
 % Non è possibile che ci sia un match tra due componenti che non abbiano la stessa label
 :- net(L1, N, _, _, _, _), cad(L2,C,  _, _, _, _), match(N,C), L1!=L2.
 
-% Non è possibile che due componenti individuati come successivi e che fanno un match nella RETE non lo siano nel CAD
-% e viceversa
+% Non è possibile che due componenti individuati come successivi 
+% e che fanno un match nella RETE non lo siano nel CAD e viceversa
 :- succNet(N1,N2),  not succCad(C1,C2), match(N1,C1), match(N2,C2).
 :- not succNet(N1,N2), succCad(C1,C2), match(N1,C1), match(N2,C2).
 
-erroreNet(N1):- net(N1), not matchAux(N1).
+erroreNet(N1):- net(_,N1,_,_,_,_), not matchAux(N1).
 matchAux(N1):- match(N1,_).
 
-erroreCad(C1):- cad(C1), not matchAuxCad(C1).
-matchAuxCad(C1):- match(_,C1).
+%erroreCad(C1):- cad(_,C1,_,_,_,_), not matchAuxCad(C1).
+%matchAuxCad(C1):- match(_,C1).
+
 
 :~ nMatch(X,Y). [1@1,X,Y]

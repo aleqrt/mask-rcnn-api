@@ -1,0 +1,31 @@
+DLV 2.0
+
+{compNonPresente("18"), 
+compNonPresente("15"), 
+compNonPresente("16"), 
+compNonPresente("25"), 
+posRelCad("20",10,"21",11,left), 
+posRelCad("25",15,"25",16,left), 
+posRelCad("14",2,"15",3,left), 
+posRelCad("15",3,"16",4,left), 
+posRelCad("23",13,"25",15,left), 
+posRelCad("19",8,"19",9,left), 
+posRelCad("18",7,"19",8,left), 
+posRelCad("18",6,"18",7,left), 
+posRelCad("13",1,"14",2,left), 
+posRelCad("13",0,"13",1,left), 
+posRelCad("16",4,"17",5,left), 
+posRelCad("19",9,"20",10,left), 
+posRelCad("21",11,"22",12,left), 
+posRelCad("22",12,"23",13,left), 
+posRelNet("23",12,"23",2,left), 
+posRelNet("19",7,"20",1,left), 
+posRelNet("20",1,"21",10,left), 
+posRelNet("14",11,"17",4,left), 
+posRelNet("21",10,"22",6,left), 
+posRelNet("14",5,"14",11,left), 
+posRelNet("13",8,"14",5,left), 
+posRelNet("22",6,"23",12,left), 
+posRelNet("23",2,"23",9,left)}
+COST 204@1
+OPTIMUM

@@ -43,8 +43,8 @@ def get_ax(rows=1, cols=1, size=8):
 if __name__ == '__main__':
 
     info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/0A00018253.04/test/annots/labels.txt",
-                     'annotation_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/test/annots/",
-                     'images_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/test/images/"},
+                     'annotation_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/demo/annots/",
+                     'images_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/demo/images/"},
             'saved_model_dir': "weights/elettrocablaggi_20200921/"}
 
     inference_config = elettrocablaggi.ElettrocablaggiInferenceConfig()
@@ -108,7 +108,7 @@ if __name__ == '__main__':
         image_name = dataset_val.source_image_link(image_id).split('/')[-1]
 
         # check if directory exist and the file is empty
-        p_dir = os.path.join(prediction_dir, "prediction")
+        p_dir = os.path.join(prediction_dir, "prediction_demo")
         if not os.path.isdir(p_dir):
             os.mkdir(p_dir)
 
@@ -116,14 +116,14 @@ if __name__ == '__main__':
         plt.close(fig)
 
         # create file and directory
-        net_dir = os.path.join("reasoner", "net")
+        net_dir = os.path.join("reasoner", "net_demo")
         file_name = "{}_net.asp".format(image_name[:-4])
         dlv_output_name = "{}_output_net.asp".format(image_name[:-4])
         dlv_program_name = 'encoding.asp'
 
         # check if directory exist and the file is empty
         if not os.path.isdir(net_dir):
-            os.mkdir(os.path.join("reasoner", "net"))
+            os.mkdir(os.path.join("reasoner", "net_demo"))
         if glob.glob(os.path.join(net_dir, file_name)):
             os.remove(os.path.join(net_dir, file_name))
         if glob.glob(os.path.join(net_dir, dlv_output_name)):
@@ -143,9 +143,9 @@ if __name__ == '__main__':
                                                               xs, ys,
                                                               xd, yd))
 
-        os.system('./{} {} {} --filter=posRelNet/5 > {}'
-                  .format(os.path.join("reasoner", "dlv2"),
-                          os.path.join(net_dir, file_name),
-                          os.path.join("reasoner", "encoding", dlv_program_name),
-                          os.path.join(net_dir, dlv_output_name))
-                  )
+        # os.system('./{} {} {} --filter=posRelNet/5 > {}'
+        #           .format(os.path.join("reasoner", "dlv2"),
+        #                   os.path.join(net_dir, file_name),
+        #                   os.path.join("reasoner", "encoding", dlv_program_name),
+        #                   os.path.join(net_dir, dlv_output_name))
+        #           )
