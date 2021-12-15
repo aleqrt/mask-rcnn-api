@@ -12,13 +12,18 @@ Il codice sorgente è scaricabile da github al link https://github.com/matterpor
 A seguire, le direttive di come installare l'ambiente utilizzando python 3.6 e miniconda3.
 
 Creare un enviromnent conda contenente python 3.6
+
 `conda create -n mask-rcnn python=3.6 --channel conda-forge`
 
 Attivare l'environment appena generato
+
 `conda activate mask-rcnn`
 
 Posizionarsi nella root folder del progetto e installare i pacchetti python richiesti (elencati nel file requirements.txt)
+
 `pip install -r requirements.txt`
+
+`python setup.py install`
 
 # Preparazione del dataset
 Per realizzare le annotazioni di ogni immagine del dataset, utilizziamo un tool open-source ad hoc per annotare ed etichettare gli ogetti di un immagine: microsoft VoTT. 

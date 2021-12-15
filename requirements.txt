@@ -1,4 +1,3 @@
-h5py==2.10.0
 scipy
 imgaug
 pandas
@@ -9,9 +8,7 @@ networkx
 matplotlib
 scikit-learn
 IPython[all]
-opencv-python
 keras==2.0.8
-numpy==1.19.3
 tensorflow==1.15
 scikit-image==0.16.2
 opencv-python==3.4.2.17

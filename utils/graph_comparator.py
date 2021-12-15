@@ -129,10 +129,10 @@ def main():
     G_net = nx.Graph()
 
     nodes_net = [i + 1 for i in range(len(comp_net))]
-    edge = [(lst[1], lst[3]) for lst in neig_net]
+    edge_net = [(lst[1], lst[3]) for lst in neig_net]
 
     G_net.add_nodes_from(nodes_net)
-    G_net.add_edges_from(edge)
+    G_net.add_edges_from(edge_net)
 
     mapping_net = {}
     for e in comp_net:
@@ -162,13 +162,12 @@ def main():
     for e in neig_net:
         edge_labels_net[e[1], e[3]] = e[4]
 
-    nx.draw_networkx_edge_labels(G_net, pos_net, edge_labels=edge_labels_net, font_color='red')
-
     # draw the graph
-    nx.draw(G_net, pos_net, node_color='skyblue')
+    # nx.draw_networkx_edge_labels(G_net, pos_net, edge_labels=edge_labels_net, font_color='red')
+    nx.draw(G_net, pos_net, node_color='skyblue', alpha=0.9)
     nx.draw_networkx_labels(G_net, pos_net, mapping_net)
 
-    fig.savefig(os.path.join(graph_dir, "graph_net"))
+    fig.savefig(os.path.join(graph_dir, "0A00018253_04_graph_net"))
     plt.close(fig)
 
     ################################################################################################################
@@ -211,7 +210,8 @@ def main():
     for i, e in enumerate(comp_cad):
         pos_cad[e[1]] = xy[i, :]
 
-    # con l'utilizzo del file ASP ottenuto dal tool grafico, viene aggiunto il nodo 0
+    # Rimozione del nodo con id 0. Il parsing del file ASP ottenuto tool grafico aggiunge il nodo con id 0.
+    # I componenti hanno id >= 1.
     if G_cad.has_node(0):
         G_cad.remove_node(0)
 
@@ -223,9 +223,12 @@ def main():
     for e in neig_cad:
         edge_labels[e[1], e[3]] = e[4]
 
-    nx.draw_networkx_edge_labels(G_cad, pos_cad, edge_labels=edge_labels, font_color='red')
+    # draw the graph
+    nx.draw(G_cad, pos_cad, node_color='skyblue', alpha=0.9)
+    nx.draw_networkx_labels(G_cad, pos_cad, mapping_cad)
+    # nx.draw_networkx_edge_labels(G_cad, pos_cad, edge_labels=edge_labels, font_color='red')
 
-    fig.savefig(os.path.join(graph_dir, "graph_cad"))
+    fig.savefig(os.path.join(graph_dir, "0A00018253_04_graph_cad"))
     plt.close(fig)
 
     ################################################################################################################
@@ -239,22 +242,23 @@ def main():
     red_node = []
 
     label_green_edge = []
+    label_red_edge = []
 
     max_score = {}
 
     # ciclo su tutti i nodi del grafo CAD
     for key_cad in mapping_cad:
 
-        # check se esistono nel grafo INF nodi con la stessa label
+        # check se esistono nel grafo NET i nodi con la stessa label del CAD
         keys = [k for k, v in mapping_net.items() if v == mapping_cad[key_cad]]
         if keys:
             for key_net in keys:
 
-                # valuto la distanza euclidea tra il nodo del grafo CAD e il nodo del grafo INF con la stessa label
+                # valuto la distanza euclidea tra il nodo del grafo CAD e il nodo del grafo NET con la stessa label
                 dist = np.linalg.norm(pos_cad[key_cad] - pos_net[key_net])
                 if dist < th_dist:
 
-                    # definisco delle tuple di relazioni dei nodi per entrambi i grafi
+                    # tuple che permettono di definire la relazione tra due nodi per entrambi i grafi
                     # schema @ (label_1, label_2, position)
                     tuple_net = [(tuple_net[0], tuple_net[2], tuple_net[4]) for tuple_net in neig_net if
                                  (mapping_net[key_net] in (tuple_net[0], tuple_net[2]))]
@@ -262,11 +266,16 @@ def main():
                                  (mapping_cad[key_cad] in (tuple_cad[0], tuple_cad[2]))]
 
                     # verifico che nei due grafi siano presenti le stesse relazioni tra i nodi
+                    # l'arco diventa verde se la relazione è presente
+                    # l'arco diventa rosso se la relazione non è presente
                     count = 0
                     for t_net in tuple_net:
                         if t_net in tuple_cad:
                             label_green_edge.append(t_net)
                             count += 1
+                        else:
+                            label_red_edge.append(t_net)
+
                     # in base allo score assegno un nodo del grafo INF ad una classe
                     try:
                         score = count / len(tuple_cad)
@@ -292,11 +301,11 @@ def main():
     ################################################################################################################
     # Definisco la correttezza delle relazioni tra i nodi nel grafo
 
-    # valutazione delle relazioni in base alla label
-    label_red_edge = []
-    for tpl in neig_cad:
-        if (tpl[0], tpl[2], tpl[4]) not in label_green_edge:
-            label_red_edge.append((tpl[0], tpl[2], tpl[4]))
+    # l'arco tra due nodi se non è verde diventa rosso
+    # label_red_edge = []
+    # for tpl in neig_cad:
+    #     if (tpl[0], tpl[2], tpl[4]) not in label_green_edge:
+    #         label_red_edge.append((tpl[0], tpl[2], tpl[4]))
 
     # assegnazione di un colore agli archi del grafo in base all'id dei nodi del grafo CAD
     green_edge = []
@@ -323,6 +332,9 @@ def main():
         if 0 in lst:
             red_edge.remove(lst)
 
+    print("Id nodi con archi di collegamento correttamente riconosciuti: ", green_edge)
+    print("Id nodi con archi di collegamento NON correttamente riconosciuti: ", red_edge)
+
     ################################################################################################################
     # Rappresentazione del grafo CAD colorato in base ai nodi e gli archi riconosciuti
 
@@ -330,6 +342,7 @@ def main():
 
     G_cad_col.add_nodes_from(nodes_cad)
     edge = [(lst[1], lst[3]) for lst in neig_cad]
+
     G_cad_col.add_edges_from(edge)
 
     fig, ax = get_ax()
@@ -350,7 +363,7 @@ def main():
 
     # nx.draw_networkx_edge_labels(G_cad_col, pos_cad, edge_labels=edge_labels, font_color='skyblue')
 
-    fig.savefig(os.path.join(graph_dir, "validation_graph"))
+    fig.savefig(os.path.join(graph_dir, "0A00018253_04_validation_graph"))
     plt.close(fig)
 
 
