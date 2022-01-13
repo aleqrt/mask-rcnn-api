@@ -1,3 +1,0 @@
-DLV 2.0
-
-{posRelCad("21",11,"22",12,left),posRelCad("20",10,"21",11,left),posRelCad("18",6,"18",7,left),posRelCad("19",9,"20",10,left),posRelCad("19",8,"19",9,left),posRelCad("13",1,"14",2,left),posRelCad("16",4,"17",5,left),posRelCad("23",13,"25",15,left),posRelCad("22",12,"23",13,left),posRelCad("13",0,"13",1,left),posRelCad("15",3,"16",4,left),posRelCad("14",2,"15",3,left),posRelCad("18",7,"19",8,left),posRelCad("25",15,"25",16,left)}
