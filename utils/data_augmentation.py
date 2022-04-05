@@ -1,4 +1,5 @@
 import argparse
+import cv2 as cv2
 import os
 import json
 import string
@@ -12,11 +13,19 @@ from skimage import filters
 from skimage import io
 from skimage.util import random_noise
 from skimage.util import invert
-from skimage import exposure
-from sklearn.preprocessing import minmax_scale
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
+
+
+def adjust_gamma(image, gamma=1.0):
+    # build a lookup table mapping the pixel values [0, 255] to
+    # their adjusted gamma values
+    invGamma = 1.0 / gamma
+    table = np.array([((i / 255.0) ** invGamma) * 255
+                      for i in np.arange(0, 256)]).astype("uint8")
+    # apply gamma correction using the lookup table
+    return cv2.LUT(image, table)
 
 
 def new_xy_coord(region, w, h, key, random_degree):
@@ -91,18 +100,8 @@ def gaussian_blur(image_array: ndarray):
     return sk.filters.gaussian(image_array, multichannel=True)
 
 
-def sharpening(image_array: ndarray):
-    sobel = sk.filters.sobel(image_array)
-    sobel *= 255
-    sobel = np.abs(sobel)
-    sharped_image = image_array + sobel
-    for i in range(3):
-        sharped_image[:, :, i] = minmax_scale(sharped_image[:, :, i])
-    return sharped_image
-
-
-def horizontal_flip(image_array: ndarray):
-    return image_array[:, ::-1]
+def horizontal_flip(image_array):
+    return np.fliplr(image_array)
 
 
 def add_noise(image_array: ndarray):
@@ -113,17 +112,8 @@ def invert_image(image_array: ndarray):
     return invert(image_array)
 
 
-def rescale_intensity(image_array: ndarray):
-    v_min, v_max = np.percentile(image_array, (0.9, 90))
-    return exposure.rescale_intensity(image_array, in_range=(v_min, v_max))
-
-
-def gamma_correction(image_array: ndarray):
-    return exposure.adjust_gamma(image_array, gamma=0.4, gain=0.9)
-
-
-def sigmoid_correction(image_array: ndarray):
-    return exposure.adjust_sigmoid(image_array)
+def gamma_correction(image_array, gamma):
+    return adjust_gamma(image_array, gamma=gamma)
 
 
 def save_annot(new_annot, new_file_name, images_path, annots_path, width, height):
@@ -159,13 +149,10 @@ def classic_augmentation(images_path, annots_path):
         'rotate90': rotation90,
         'rotate270': rotation270,
         'gaussian_blur': gaussian_blur,
-        'sharpening': sharpening,
-        'horizontal_flip': horizontal_flip,
+        # 'horizontal_flip': horizontal_flip,
         'add_noise': add_noise,
         'invert_image': invert_image,
-        'rescale_intensity': rescale_intensity,
-        'gamma_correction': gamma_correction,
-        'sigmoid_correction': sigmoid_correction
+        'gamma_correction': gamma_correction
     }
 
     # find all files paths from the folders
@@ -188,8 +175,7 @@ def classic_augmentation(images_path, annots_path):
             random_degree = 0
             keys = list(available_transformations)
             for key in keys:
-                # read image as an two dimensional array of pixels and read XML annotation
-                temp_img = io.imread(os.path.join(images_path, img))
+                temp_img = cv2.imread(os.path.join(images_path, img))
 
                 new_annot = dict()
                 new_annot['regions'] = list()
@@ -198,6 +184,22 @@ def classic_augmentation(images_path, annots_path):
                     aug_img, random_degree = available_transformations[key](temp_img)
                     height = annot['asset']['size']['width']
                     width = annot['asset']['size']['height']
+                elif key == 'gamma_correction':
+                    for gamma in np.arange(0.5, 3.5, 0.5):
+                        # ignore when gamma is 1 (there will be no change to the image)
+                        if gamma == 1:
+                            continue
+                        aug_img = available_transformations[key](temp_img, gamma)
+                        width = annot['asset']['size']['width']
+                        height = annot['asset']['size']['height']
+
+                        # write image to the disk
+                        new_file_name = f'augmented_image_{key}_{gamma}_{tot}'
+                        cv2.imwrite(os.path.join(images_path, new_file_name + '.jpg'), aug_img)
+                        save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
+                        print(new_file_name + " OK!")
+
+                        tot += 1
                 else:
                     aug_img = available_transformations[key](temp_img)
                     width = annot['asset']['size']['width']
@@ -207,15 +209,22 @@ def classic_augmentation(images_path, annots_path):
                 for region in annot['regions']:
                     new_annot['regions'].append(new_xy_coord(region, width, height, key, random_degree))
 
-                # write image to the disk
-                new_file_name = 'augmented_image_%s' % tot
-                io.imsave(os.path.join(images_path, new_file_name + '.jpg'), (aug_img*255).astype(np.uint8))
-                save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
-                print(new_file_name + " OK!")
+                if key not in ['gamma_correction', 'invert_image']:
+                    # write image to the disk
+                    new_file_name = f'augmented_image_{key}_{tot}'
+                    cv2.imwrite(os.path.join(images_path, new_file_name + '.jpg'), (aug_img * 255).astype(np.uint8))
+                    save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
+                    print(new_file_name + " OK!")
+                elif key == 'invert_image':
+                    new_file_name = f'augmented_image_{key}_{tot}'
+                    cv2.imwrite(os.path.join(images_path, new_file_name + '.jpg'), aug_img)
+                    save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
+                    print(new_file_name + " OK!")
 
                 # Incremento contatore per il numero di immagini soggette a trasformazioni
                 tot += 1
         except:
+            print(f"An exception occurred at trasformation {key} applied at image {img}")
             continue
 
 

@@ -5,7 +5,7 @@ instance segmentation su immagini.
 Il codice sorgente è scaricabile da github al link https://github.com/matterport/Mask_RCNN.
 
 # Requisiti
-- **python 3.6**
+- **python 3.7**
 - **anaconda3** oppure **miniconda3**
 
 # Installazione
@@ -13,7 +13,7 @@ A seguire, le direttive di come installare l'ambiente utilizzando python 3.6 e m
 
 Creare un enviromnent conda contenente python 3.6
 
-`conda create -n mask-rcnn python=3.6 --channel conda-forge`
+`conda create -n mask-rcnn python=3.7 --channel conda-forge`
 
 Attivare l'environment appena generato
 

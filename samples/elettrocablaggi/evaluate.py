@@ -47,23 +47,30 @@ if __name__ == '__main__':
     # image_ids = np.random.choice(dataset_val.image_ids, 10)
     image_ids = dataset_val.image_ids
     APs = []
+    APs_range = []
     for image_id in image_ids:
         # Load image and cad data
         image, image_meta, gt_class_id, gt_bbox, gt_mask = \
             modellib.load_image_gt(dataset_val, inference_config,
                                    image_id, use_mini_mask=False)
         molded_images = np.expand_dims(modellib.mold_image(image, inference_config), 0)
+
         # Run object detection
         results = model.detect([image], verbose=0)
         r = results[0]
+
         # Compute AP
-        AP, precision, recall, overlap = \
-            utils.compute_ap(gt_bbox, gt_class_id, gt_mask,
-                             r["rois"], r["class_ids"], r["scores"], r['masks'])
+        AP, precision, recall, overlap = utils.compute_ap(gt_bbox, gt_class_id, gt_mask,
+                                                          r["rois"], r["class_ids"], r["scores"], r['masks'])
         APs.append(AP)
-        print("Imagine {} - AP: {}".format(image_id, AP))
+        print("Imagine {} - AP @0.5: {}".format(image_id, AP))
+
+        # Compute AP - range 0.55:0.05:0.95
+        AP_range = utils.compute_ap_range(gt_bbox, gt_class_id, gt_mask,
+                                          r["rois"], r["class_ids"], r["scores"], r['masks'])
+        APs_range.append(AP_range)
 
     print("########## Evaluation on test dataset ##########")
-    print("mAP: ", np.mean(APs))
-    print("var(AP): ", np.var(APs))
+    print("mAP @0.5: {}, with standard deviation: {}".format(np.mean(APs), np.std(APs)))
+    print("mAP range [0.5:0.05:0.95]: {}, with standard deviation: {}".format(np.mean(APs_range), np.std(APs_range)))
     print("Best AP: ", max(APs), " at Image: ", APs.index(max(APs)))
