@@ -193,36 +193,38 @@ def classic_augmentation(images_path, annots_path):
                         width = annot['asset']['size']['width']
                         height = annot['asset']['size']['height']
 
+                        # generete new annotation for the transformed image
+                        for region in annot['regions']:
+                            new_annot['regions'].append(new_xy_coord(region, width, height, key, random_degree))
+
                         # write image to the disk
                         new_file_name = f'augmented_image_{key}_{gamma}_{tot}'
                         cv2.imwrite(os.path.join(images_path, new_file_name + '.jpg'), aug_img)
                         save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
                         print(new_file_name + " OK!")
-
                         tot += 1
                 else:
                     aug_img = available_transformations[key](temp_img)
                     width = annot['asset']['size']['width']
                     height = annot['asset']['size']['height']
 
-                # generete new annotation for the transformed image
-                for region in annot['regions']:
-                    new_annot['regions'].append(new_xy_coord(region, width, height, key, random_degree))
+                if key != 'gamma_correction':
+                    # generete new annotation for the transformed image
+                    for region in annot['regions']:
+                        new_annot['regions'].append(new_xy_coord(region, width, height, key, random_degree))
 
-                if key not in ['gamma_correction', 'invert_image']:
-                    # write image to the disk
                     new_file_name = f'augmented_image_{key}_{tot}'
-                    cv2.imwrite(os.path.join(images_path, new_file_name + '.jpg'), (aug_img * 255).astype(np.uint8))
+
+                    if key == 'invert_image':
+                        # write image to the disk
+                        cv2.imwrite(os.path.join(images_path, new_file_name + '.jpg'), (aug_img * 255).astype(np.uint8))
+                    else:
+                        cv2.imwrite(os.path.join(images_path, new_file_name + '.jpg'), aug_img)
+
                     save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
                     print(new_file_name + " OK!")
-                elif key == 'invert_image':
-                    new_file_name = f'augmented_image_{key}_{tot}'
-                    cv2.imwrite(os.path.join(images_path, new_file_name + '.jpg'), aug_img)
-                    save_annot(new_annot, new_file_name, images_path, annots_path, width, height)
-                    print(new_file_name + " OK!")
+                    tot += 1
 
-                # Incremento contatore per il numero di immagini soggette a trasformazioni
-                tot += 1
         except:
             print(f"An exception occurred at trasformation {key} applied at image {img}")
             continue
