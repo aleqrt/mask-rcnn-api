@@ -104,7 +104,7 @@ def main(images_path, annots_path):
     components = [f for f in os.listdir(components_path) if os.path.isfile(os.path.join(components_path, f))]
 
     tot = 0
-    max_count = 10000
+    max_count = 5000
 
     for background in backgrounds:
         background = Image.open(background)
