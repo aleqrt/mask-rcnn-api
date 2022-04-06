@@ -5,7 +5,7 @@ Il seguente script permette la realizzazione di un dataset sintetico.
    - .../[PATH]/data_augmentation/
 
  Il dataset contenete le immagini con i ritagli dei singoli componenti deve trovarsi nella sottocartella
-   - .../[PATH]/data_augmentation/images/
+   - .../[PATH]/data_augmentation/
 
  Le annotazioni dei singoli componenti si trovano nella sottocartella
    - .../[PATH]/data_augmentation/annots/vott-json-export/json_singoli_componenti
@@ -104,7 +104,7 @@ def main(images_path, annots_path):
     components = [f for f in os.listdir(components_path) if os.path.isfile(os.path.join(components_path, f))]
 
     tot = 0
-    max_count = 2000
+    max_count = 10000
 
     for background in backgrounds:
         background = Image.open(background)
@@ -158,12 +158,12 @@ def main(images_path, annots_path):
                         break
 
             # split train e test set
-            if decision(0.3):
-                destination_dir_images = 'dataset/elettrocablaggi_20200921/0A00018253.04/test/images/'
-                destination_dir_annots = 'dataset/elettrocablaggi_20200921/0A00018253.04/test/annots/'
-            else:
-                destination_dir_images = 'dataset/elettrocablaggi_20200921/0A00018253.04/train/images/'
-                destination_dir_annots = 'dataset/elettrocablaggi_20200921/0A00018253.04/train/annots/'
+            # if decision(0.3):
+            #     destination_dir_images = 'dataset/elettrocablaggi_20200921/GRETA_230V/test/images/'
+            #     destination_dir_annots = 'dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/'
+            # else:
+            destination_dir_images = 'dataset/elettrocablaggi_20200921/GRETA_230V/train/images/'
+            destination_dir_annots = 'dataset/elettrocablaggi_20200921/GRETA_230V/train/annots/'
 
             new_file_name = 'synthetic_image_%s' % tot
             tot += 1
