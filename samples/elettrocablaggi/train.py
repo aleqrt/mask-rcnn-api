@@ -12,12 +12,12 @@ with warnings.catch_warnings():
 
 
 if __name__ == '__main__':
-    info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/0A00018253.04/train/annots/labels.txt",
-                      'annotation_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/train/annots/",
-                      'images_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/train/images/"},
-            'test': {'label_file_path': "dataset/elettrocablaggi_20200921/0A00018253.04/test/annots/labels.txt",
-                     'annotation_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/test/annots/",
-                     'images_dir': "dataset/elettrocablaggi_20200921/0A00018253.04/test/images/"},
+    info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/GRETA_230V/train/annots/labels.txt",
+                      'annotation_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/train/annots/",
+                      'images_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/train/images/"},
+            'test': {'label_file_path': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/labels.txt",
+                     'annotation_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/",
+                     'images_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/images/"},
             'saved_model_dir': "weights/elettrocablaggi_20200921/",
             'coco_weights_path': "weights/mask_rcnn_coco.h5"}
 

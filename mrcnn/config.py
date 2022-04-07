@@ -157,7 +157,7 @@ class Config(object):
     # To change this you also need to change the neural network mask branch
     MASK_SHAPE = [28, 28]
 
-    # Maximum number of cad instances to use in one image
+    # Maximum number of ground truth instances to use in one image
     MAX_GT_INSTANCES = 100
 
     # Bounding box refinement standard deviation for RPN and final detections.
@@ -169,10 +169,10 @@ class Config(object):
 
     # Minimum probability value to accept a detected instance
     # ROIs below this threshold are skipped
-    DETECTION_MIN_CONFIDENCE = 0.8
+    DETECTION_MIN_CONFIDENCE = 0.7
 
     # Non-maximum suppression threshold for detection
-    DETECTION_NMS_THRESHOLD = 0.5
+    DETECTION_NMS_THRESHOLD = 0.3
 
     # Learning rate and momentum
     # The Mask RCNN paper uses lr=0.02, but on TensorFlow it causes
@@ -227,10 +227,17 @@ class Config(object):
         # See compose_image_meta() for details
         self.IMAGE_META_SIZE = 1 + 3 + 3 + 4 + 1 + self.NUM_CLASSES
 
+    def to_dict(self):
+        return {a: getattr(self, a)
+                for a in sorted(dir(self))
+                if not a.startswith("__") and not callable(getattr(self, a))}
+
     def display(self):
         """Display Configuration values."""
         print("\nConfigurations:")
-        for a in dir(self):
-            if not a.startswith("__") and not callable(getattr(self, a)):
-                print("{:30} {}".format(a, getattr(self, a)))
+        for key, val in self.to_dict().items():
+            print(f"{key:30} {val}")
+        # for a in dir(self):
+        #     if not a.startswith("__") and not callable(getattr(self, a)):
+        #         print("{:30} {}".format(a, getattr(self, a)))
         print("\n")

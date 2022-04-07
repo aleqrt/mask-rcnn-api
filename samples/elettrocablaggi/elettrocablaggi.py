@@ -121,7 +121,7 @@ class ElettrocablaggiConfig(Config):
     IMAGES_PER_GPU = 2
 
     # Number of classes (including background)
-    NUM_CLASSES = 1 + 28  # background + 27 components (the 0 component not exist in current dataset, but is necessary)
+    NUM_CLASSES = 1 + 13  # background + 12 components (the 0 component not exist in current dataset, but is necessary)
 
     # Use small images for faster training. Set the limits of the small side
     # the large side, and that determines the image shape.
@@ -137,7 +137,7 @@ class ElettrocablaggiConfig(Config):
     TRAIN_ROIS_PER_IMAGE = 32
 
     # Use a small epoch since the data is simple
-    STEPS_PER_EPOCH = 300
+    STEPS_PER_EPOCH = 100
 
     # use small validation steps since the epoch is small
     VALIDATION_STEPS = 15

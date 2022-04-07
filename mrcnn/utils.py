@@ -13,7 +13,7 @@ import logging
 import math
 import random
 import numpy as np
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import scipy
 import skimage.color
 import skimage.io
@@ -101,7 +101,7 @@ def compute_overlaps_masks(masks1, masks2):
     """Computes IoU overlaps between two sets of masks.
     masks1, masks2: [Height, Width, instances]
     """
-    
+
     # If either set of masks is empty return empty result
     if masks1.shape[-1] == 0 or masks2.shape[-1] == 0:
         return np.zeros((masks1.shape[-1], masks2.shape[-1]))
@@ -199,8 +199,8 @@ def box_refinement_graph(box, gt_box):
 
     dy = (gt_center_y - center_y) / height
     dx = (gt_center_x - center_x) / width
-    dh = tf.log(gt_height / height)
-    dw = tf.log(gt_width / width)
+    dh = tf.math.log(gt_height / height)
+    dw = tf.math.log(gt_width / width)
 
     result = tf.stack([dy, dx, dh, dw], axis=1)
     return result
@@ -656,13 +656,13 @@ def trim_zeros(x):
 def compute_matches(gt_boxes, gt_class_ids, gt_masks,
                     pred_boxes, pred_class_ids, pred_scores, pred_masks,
                     iou_threshold=0.5, score_threshold=0.0):
-    """Finds matches between prediction and cad instances.
+    """Finds matches between prediction and ground truth instances.
 
     Returns:
         gt_match: 1-D array. For each GT box it has the index of the matched
                   predicted box.
         pred_match: 1-D array. For each predicted box, it has the index of
-                    the matched cad box.
+                    the matched ground truth box.
         overlaps: [pred_boxes, gt_boxes] IoU overlaps.
     """
     # Trim zero padding
@@ -681,12 +681,12 @@ def compute_matches(gt_boxes, gt_class_ids, gt_masks,
     # Compute IoU overlaps [pred_masks, gt_masks]
     overlaps = compute_overlaps_masks(pred_masks, gt_masks)
 
-    # Loop through predictions and find matching cad boxes
+    # Loop through predictions and find matching ground truth boxes
     match_count = 0
     pred_match = -1 * np.ones([pred_boxes.shape[0]])
     gt_match = -1 * np.ones([gt_boxes.shape[0]])
     for i in range(len(pred_boxes)):
-        # Find best matching cad box
+        # Find best matching ground truth box
         # 1. Sort matches by score
         sorted_ixs = np.argsort(overlaps[i])[::-1]
         # 2. Remove low scores
@@ -695,7 +695,7 @@ def compute_matches(gt_boxes, gt_class_ids, gt_masks,
             sorted_ixs = sorted_ixs[:low_score_idx[0]]
         # 3. Find the match
         for j in sorted_ixs:
-            # If cad box is already matched, go to next one
+            # If ground truth box is already matched, go to next one
             if gt_match[j] > -1:
                 continue
             # If we reach IoU smaller than the threshold, end the loop
