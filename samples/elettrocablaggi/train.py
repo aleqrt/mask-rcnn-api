@@ -4,7 +4,7 @@ import warnings
 import elettrocablaggi
 import tensorflow as tf
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
