@@ -9,10 +9,10 @@ matplotlib
 scikit-learn
 IPython[all]
 numpy
-tensorflow==2.2
+tensorflow-gpu==2.4.0
 scikit-image==0.16.2
 opencv-python
-opencv-contrib-python==3.4.2.17
+opencv-contrib-python
 
 
 

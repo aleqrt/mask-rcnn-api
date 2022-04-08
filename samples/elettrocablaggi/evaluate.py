@@ -17,7 +17,7 @@ if __name__ == '__main__':
     info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/labels.txt",
                      'annotation_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/",
                      'images_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/images/"},
-            'saved_model_dir': "weights/elettrocablaggi_20200921/"}
+            'saved_model_dir': "weights/elettrocablaggi/GRETA_230V/"}
 
     inference_config = elettrocablaggi.ElettrocablaggiInferenceConfig()
 
