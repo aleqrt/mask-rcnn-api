@@ -100,7 +100,7 @@ class Config(object):
 
     # If enabled, resizes instance masks to a smaller size to reduce
     # memory load. Recommended when using high-resolution images.
-    USE_MINI_MASK = True
+    USE_MINI_MASK = False
     MINI_MASK_SHAPE = (56, 56)  # (height, width) of the mini-mask
 
     # Input image resizing
@@ -168,7 +168,7 @@ class Config(object):
     DETECTION_MAX_INSTANCES = 100
 
     # Minimum probability value to accept a detected instance
-    # ROIs below this threshold are skipped
+    # ROIs below this threshold are skippedUSE_MINI_MASK
     DETECTION_MIN_CONFIDENCE = 0.7
 
     # Non-maximum suppression threshold for detection

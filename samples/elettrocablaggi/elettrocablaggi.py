@@ -137,7 +137,7 @@ class ElettrocablaggiConfig(Config):
     TRAIN_ROIS_PER_IMAGE = 32
 
     # Use a small epoch since the data is simple
-    STEPS_PER_EPOCH = 100
+    STEPS_PER_EPOCH = 150
 
     # use small validation steps since the epoch is small
     VALIDATION_STEPS = 15
@@ -151,6 +151,13 @@ class ElettrocablaggiConfig(Config):
 
     # Weight decay regularization
     WEIGHT_DECAY = 5e-4
+
+    # Remove mini_mask in order to evaluate the performance of the model
+    USE_MINI_MASK = False
+
+    # Minimum probability value to accept a detected instance
+    # ROIs below this threshold are skipped
+    DETECTION_MIN_CONFIDENCE = 0.9
 
 
 class ElettrocablaggiInferenceConfig(ElettrocablaggiConfig):

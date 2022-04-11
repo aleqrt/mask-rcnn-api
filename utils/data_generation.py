@@ -158,12 +158,12 @@ def main(images_path, annots_path):
                         break
 
             # split train e test set
-            # if decision(0.3):
-            #     destination_dir_images = 'dataset/elettrocablaggi_20200921/GRETA_230V/test/images/'
-            #     destination_dir_annots = 'dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/'
-            # else:
-            destination_dir_images = 'dataset/elettrocablaggi_20200921/GRETA_230V/train/images/'
-            destination_dir_annots = 'dataset/elettrocablaggi_20200921/GRETA_230V/train/annots/'
+            if decision(0.3):
+                destination_dir_images = 'dataset/elettrocablaggi_20200921/GRETA_230V/test/images/'
+                destination_dir_annots = 'dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/'
+            else:
+                destination_dir_images = 'dataset/elettrocablaggi_20200921/GRETA_230V/train/images/'
+                destination_dir_annots = 'dataset/elettrocablaggi_20200921/GRETA_230V/train/annots/'
 
             new_file_name = 'synthetic_image_%s' % tot
             tot += 1

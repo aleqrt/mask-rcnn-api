@@ -78,7 +78,7 @@ if __name__ == '__main__':
     print("Train network heads")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=150,
+                epochs=105,
                 layers='heads')
 
     # Fine tune from layers 5+ because GPU used not have sufficient RAM to train all net

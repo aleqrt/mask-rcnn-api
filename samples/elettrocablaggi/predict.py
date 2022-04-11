@@ -19,6 +19,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import elettrocablaggi
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     # Root directory of the project
@@ -92,8 +94,7 @@ if __name__ == '__main__':
         # load original image
         original_image, image_meta, gt_class_id, gt_bbox, gt_mask = modellib.load_image_gt(dataset_val,
                                                                                            inference_config,
-                                                                                           image_id,
-                                                                                           use_mini_mask=False)
+                                                                                           image_id)
 
         # infer on original image
         results = model.detect([original_image], verbose=1)
@@ -108,44 +109,37 @@ if __name__ == '__main__':
         image_name = dataset_val.source_image_link(image_id).split('/')[-1]
 
         # check if directory exist and the file is empty
-        p_dir = os.path.join(prediction_dir, "prediction_demo")
+        p_dir = os.path.join(prediction_dir, "prediction")
         if not os.path.isdir(p_dir):
             os.mkdir(p_dir)
 
         fig.savefig(os.path.join(p_dir, image_name))
         plt.close(fig)
 
-        # create file and directory
-        net_dir = os.path.join("reasoner", "net_demo")
-        file_name = "{}_net.asp".format(image_name[:-4])
-        dlv_output_name = "{}_output_net.asp".format(image_name[:-4])
-        dlv_program_name = 'encoding.asp'
-
-        # check if directory exist and the file is empty
-        if not os.path.isdir(net_dir):
-            os.mkdir(os.path.join("reasoner", "net_demo"))
-        if glob.glob(os.path.join(net_dir, file_name)):
-            os.remove(os.path.join(net_dir, file_name))
-        if glob.glob(os.path.join(net_dir, dlv_output_name)):
-            os.remove(os.path.join(net_dir, dlv_output_name))
-
-        # write facts for DLV reasoner in a txt file
-        with open(os.path.join(net_dir, file_name), "a") as f:
-            for i in range(r['rois'].shape[0]):
-                # NOTE: READ DESCRIPTION IN TOP OF FILE UNDERSTAND THE COORDINATES OF COMPONENT
-                xs = int(min(r['rois'][i, 1], r['rois'][i, 3]))
-                ys = int(min(r['rois'][i, 0], r['rois'][i, 2]))
-
-                xd = int(max(r['rois'][i, 1], r['rois'][i, 3]))
-                yd = int(max(r['rois'][i, 0], r['rois'][i, 2]))
-
-                f.write('net("{}",{},{},{},{},{}). \n'.format(r['class_ids'][i] - 1, i + 1,
-                                                              xs, ys,
-                                                              xd, yd))
-
-        # os.system('./{} {} {} --filter=posRelNet/5 > {}'
-        #           .format(os.path.join("reasoner", "dlv2"),
-        #                   os.path.join(net_dir, file_name),
-        #                   os.path.join("reasoner", "encoding", dlv_program_name),
-        #                   os.path.join(net_dir, dlv_output_name))
-        #           )
+        # # create file and directory
+        # net_dir = os.path.join("reasoner", "net_demo")
+        # file_name = "{}_net.asp".format(image_name[:-4])
+        # dlv_output_name = "{}_output_net.asp".format(image_name[:-4])
+        # dlv_program_name = 'encoding.asp'
+        #
+        # # check if directory exist and the file is empty
+        # if not os.path.isdir(net_dir):
+        #     os.mkdir(os.path.join("reasoner", "net_demo"))
+        # if glob.glob(os.path.join(net_dir, file_name)):
+        #     os.remove(os.path.join(net_dir, file_name))
+        # if glob.glob(os.path.join(net_dir, dlv_output_name)):
+        #     os.remove(os.path.join(net_dir, dlv_output_name))
+        #
+        # # write facts for DLV reasoner in a txt file
+        # with open(os.path.join(net_dir, file_name), "a") as f:
+        #     for i in range(r['rois'].shape[0]):
+        #         # NOTE: READ DESCRIPTION IN TOP OF FILE UNDERSTAND THE COORDINATES OF COMPONENT
+        #         xs = int(min(r['rois'][i, 1], r['rois'][i, 3]))
+        #         ys = int(min(r['rois'][i, 0], r['rois'][i, 2]))
+        #
+        #         xd = int(max(r['rois'][i, 1], r['rois'][i, 3]))
+        #         yd = int(max(r['rois'][i, 0], r['rois'][i, 2]))
+        #
+        #         f.write('net("{}",{},{},{},{},{}). \n'.format(r['class_ids'][i] - 1, i + 1,
+        #                                                       xs, ys,
+        #                                                       xd, yd))

@@ -4,6 +4,8 @@ import warnings
 import numpy as np
 import elettrocablaggi
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     # Root directory of the project
@@ -52,7 +54,7 @@ if __name__ == '__main__':
         # Load image and cad data
         image, image_meta, gt_class_id, gt_bbox, gt_mask = \
             modellib.load_image_gt(dataset_val, inference_config,
-                                   image_id, use_mini_mask=False)
+                                   image_id)
         molded_images = np.expand_dims(modellib.mold_image(image, inference_config), 0)
 
         # Run object detection
@@ -63,7 +65,7 @@ if __name__ == '__main__':
         AP, precision, recall, overlap = utils.compute_ap(gt_bbox, gt_class_id, gt_mask,
                                                           r["rois"], r["class_ids"], r["scores"], r['masks'])
         APs.append(AP)
-        print("Imagine {} - AP @0.5: {}".format(image_id, AP))
+        print(f"########## Imagine {image_id} ##########")
 
         # Compute AP - range 0.55:0.05:0.95
         AP_range = utils.compute_ap_range(gt_bbox, gt_class_id, gt_mask,
@@ -71,6 +73,6 @@ if __name__ == '__main__':
         APs_range.append(AP_range)
 
     print("########## Evaluation on test dataset ##########")
-    print("mAP @0.5: {}, with standard deviation: {}".format(np.mean(APs), np.std(APs)))
-    print("mAP range [0.5:0.05:0.95]: {}, with standard deviation: {}".format(np.mean(APs_range), np.std(APs_range)))
-    print("Best AP: ", max(APs), " at Image: ", APs.index(max(APs)))
+    print(f"mAP @0.5: {np.mean(APs): .3f}, with standard deviation: {np.std(APs): .3f}")
+    print(f"mAP range [0.5:0.05:0.95]: {np.mean(APs_range): .3f}, with standard deviation: {np.std(APs_range): .3f}")
+    print(f"Best AP: {max(APs): .3f} at Image: {APs.index(max(APs))}")
