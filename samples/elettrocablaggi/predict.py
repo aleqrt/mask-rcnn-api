@@ -1,6 +1,4 @@
-"""- TODO: passare da sistema XY di immagini a xy cartesiano per il calcolo delle posizioni con DLV !!!
-            Per ora il reasoner calcola correttamente RIGHT e LEFT, ma inverte TOP e BOTTOM.
-
+"""
     - class_ids contiene l'indice di dataset_val.class_names corrispondente alla label del componente
     - dataset_val.class_names: ['BG', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']
     - come è strutturato l'output della rete
@@ -19,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import elettrocablaggi
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -44,9 +42,9 @@ def get_ax(rows=1, cols=1, size=8):
 
 if __name__ == '__main__':
 
-    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/labels.txt",
-                     'annotation_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/",
-                     'images_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/images/"},
+    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/labels.txt",
+                     'annotation_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/",
+                     'images_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/images/"},
             'saved_model_dir': "weights/elettrocablaggi/GRETA_230V/"}
 
     inference_config = elettrocablaggi.ElettrocablaggiInferenceConfig()

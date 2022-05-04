@@ -1251,8 +1251,8 @@ def load_image_gt(dataset, config, image_id, augmentation=None):
         # Some, such as Affine, have settings that make them unsafe, so always
         # test your augmentation on masks
         MASK_AUGMENTERS = ["Sequential", "SomeOf", "OneOf", "Sometimes",
-                           "Fliplr", "Flipud", "CropAndPad",
-                           "Affine", "PiecewiseAffine"]
+                           "Fliplr", "Flipud", "CropAndPad", "GaussianBlur",
+                           "Affine", "PiecewiseAffine", "PerspectiveTransform"]
 
         def hook(images, augmenter, parents, default):
             """Determines which augmenters to apply to masks."""

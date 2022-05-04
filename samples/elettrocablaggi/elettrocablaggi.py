@@ -136,8 +136,11 @@ class ElettrocablaggiConfig(Config):
     # few objects. Aim to allow ROI sampling to pick 33% positive ROIs.
     TRAIN_ROIS_PER_IMAGE = 32
 
-    # Use a small epoch since the data is simple
-    STEPS_PER_EPOCH = 150
+    # The steps_per_epoch argument must specify the number of batches of samples comprising one epoch.
+    # For example, if your original dataset has 10,000 images and your batch size is 32,
+    # then a reasonable value for steps_per_epoch when fitting a model on the augmented data
+    # might be ceil(10,000/32), or 313 batches.
+    STEPS_PER_EPOCH = 1000
 
     # use small validation steps since the epoch is small
     VALIDATION_STEPS = 15

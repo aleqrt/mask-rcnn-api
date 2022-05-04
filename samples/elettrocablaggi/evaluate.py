@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 import elettrocablaggi
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -16,9 +16,9 @@ with warnings.catch_warnings():
 
 if __name__ == '__main__':
 
-    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/labels.txt",
-                     'annotation_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/",
-                     'images_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/images/"},
+    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/labels.txt",
+                     'annotation_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/",
+                     'images_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/images/"},
             'saved_model_dir': "weights/elettrocablaggi/GRETA_230V/"}
 
     inference_config = elettrocablaggi.ElettrocablaggiInferenceConfig()

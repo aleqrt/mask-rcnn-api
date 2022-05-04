@@ -3,10 +3,11 @@ import sys
 import warnings
 import elettrocablaggi
 import tensorflow as tf
+import imgaug.augmenters as iaa
 
 # tf.compat.v1.disable_eager_execution()
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -27,12 +28,12 @@ if gpus:
         print(e)
 
 if __name__ == '__main__':
-    info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/GRETA_230V/train/annots/labels.txt",
-                      'annotation_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/train/annots/",
-                      'images_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/train/images/"},
-            'test': {'label_file_path': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/labels.txt",
-                     'annotation_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/",
-                     'images_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/images/"},
+    info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train/annots/labels.txt",
+                      'annotation_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train/annots/",
+                      'images_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train/images/"},
+            'test': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/labels.txt",
+                     'annotation_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/",
+                     'images_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/images/"},
             'saved_model_dir': "weights/elettrocablaggi/GRETA_230V/",
             'coco_weights_path': "weights/mask_rcnn_coco.h5"}
 
@@ -76,14 +77,27 @@ if __name__ == '__main__':
     # Passing layers="heads" freezes all layers except the head
     # layers. You can also pass a regular expression to select
     print("Train network heads")
+    augmentation = iaa.Sometimes(0.5, [
+        # iaa.Fliplr(0.25),
+        # iaa.Flipud(0.25),
+        iaa.GaussianBlur(sigma=(0.0, 2.0)),
+        iaa.PerspectiveTransform(scale=0.02),
+        ### These transformation are not tested for mask-matching yet ###
+        # iaa.Rot90((1, 3)),
+        # iaa.ScaleX((0.25, 0.95)),
+        # iaa.ScaleY((0.25, 0.95)),
+        # iaa.AllChannelsCLAHE(clip_limit=(1, 5), per_channel=True)
+    ])
+
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=105,
-                layers='heads')
+                epochs=110,
+                layers='heads',
+                augmentation=augmentation)
 
-    # Fine tune from layers 5+ because GPU used not have sufficient RAM to train all net
+    # Fine tune from layers 5+
     # print("Train layers from 5+")
     # model.train(dataset_train, dataset_val,
     #             learning_rate=config.LEARNING_RATE,
-    #             epochs=100,
+    #             epochs=30,
     #             layers="5+")
