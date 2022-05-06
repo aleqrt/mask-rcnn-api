@@ -84,7 +84,7 @@ if __name__ == '__main__':
         # iaa.Flipud(0.25),
         iaa.GaussianBlur(sigma=(0.1, 2.0)),
         iaa.PerspectiveTransform(scale=0.03),
-        iaa.Sometimes(1, [iaa.ScaleX((0.25, 0.95)), iaa.ScaleY((0.25, 0.95))]),
+        iaa.Sometimes(1, [iaa.ScaleX(scale=0.5), iaa.ScaleY(scale=0.5)]),
         ### These transformation are not tested for mask-matching yet ###
         # iaa.Rot90((1, 3)),
         # iaa.AllChannelsCLAHE(clip_limit=(1, 5), per_channel=True)
