@@ -1252,7 +1252,8 @@ def load_image_gt(dataset, config, image_id, augmentation=None):
         # test your augmentation on masks
         MASK_AUGMENTERS = ["Sequential", "SomeOf", "OneOf", "Sometimes",
                            "Fliplr", "Flipud", "CropAndPad", "GaussianBlur",
-                           "Affine", "PiecewiseAffine", "PerspectiveTransform"]
+                           "Affine", "PiecewiseAffine", "PerspectiveTransform",
+                           "ScaleX", "ScaleY"]
 
         def hook(images, augmenter, parents, default):
             """Determines which augmenters to apply to masks."""
@@ -2341,6 +2342,9 @@ class MaskRCNN(object):
                                         histogram_freq=0, write_graph=True, write_images=False),
             keras.callbacks.ModelCheckpoint(self.checkpoint_path,
                                             verbose=0, save_weights_only=True),
+            keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1,
+                                              patience=20, min_lr=0.000001),
+            keras.callbacks.CSVLogger(os.path.join(self.log_dir, 'logs.csv'), separator=","),
         ]
 
         # Add custom callbacks to the list

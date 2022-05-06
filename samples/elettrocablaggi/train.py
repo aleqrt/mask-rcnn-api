@@ -5,8 +5,6 @@ import elettrocablaggi
 import tensorflow as tf
 import imgaug.augmenters as iaa
 
-# tf.compat.v1.disable_eager_execution()
-
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 with warnings.catch_warnings():
@@ -56,17 +54,21 @@ if __name__ == '__main__':
     config.display()
 
     # Create model in training mode
-    # with tf.device('/device:GPU:0'):
     model = MaskRCNN(mode="training",
                      config=config,
                      model_dir=info['saved_model_dir'])
-
-    # sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True, log_device_placement=True))
 
     model.load_weights(info['coco_weights_path'],
                        by_name=True,
                        exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",
                                 "mrcnn_bbox", "mrcnn_mask"])
+
+    retrain = True
+    if retrain:
+        # Load trained weights
+        model_path = model.find_last()
+        print("Loading weights from ", model_path)
+        model.load_weights(model_path, by_name=True)
 
     """Training
             Only the heads. Here we're freezing all the backbone layers and training only the randomly initialized 
@@ -77,21 +79,20 @@ if __name__ == '__main__':
     # Passing layers="heads" freezes all layers except the head
     # layers. You can also pass a regular expression to select
     print("Train network heads")
-    augmentation = iaa.Sometimes(0.5, [
+    augmentation = iaa.Sometimes(0.6, iaa.OneOf([
         # iaa.Fliplr(0.25),
         # iaa.Flipud(0.25),
-        iaa.GaussianBlur(sigma=(0.0, 2.0)),
-        iaa.PerspectiveTransform(scale=0.02),
+        iaa.GaussianBlur(sigma=(0.1, 2.0)),
+        iaa.PerspectiveTransform(scale=0.03),
+        iaa.Sometimes(1, [iaa.ScaleX((0.25, 0.95)), iaa.ScaleY((0.25, 0.95))]),
         ### These transformation are not tested for mask-matching yet ###
         # iaa.Rot90((1, 3)),
-        # iaa.ScaleX((0.25, 0.95)),
-        # iaa.ScaleY((0.25, 0.95)),
         # iaa.AllChannelsCLAHE(clip_limit=(1, 5), per_channel=True)
-    ])
+    ]))
 
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=110,
+                epochs=300,
                 layers='heads',
                 augmentation=augmentation)
 
@@ -99,5 +100,5 @@ if __name__ == '__main__':
     # print("Train layers from 5+")
     # model.train(dataset_train, dataset_val,
     #             learning_rate=config.LEARNING_RATE,
-    #             epochs=30,
+    #             epochs=100,
     #             layers="5+")
