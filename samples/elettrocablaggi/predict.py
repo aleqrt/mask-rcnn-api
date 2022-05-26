@@ -17,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import elettrocablaggi
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -114,30 +114,30 @@ if __name__ == '__main__':
         fig.savefig(os.path.join(p_dir, image_name))
         plt.close(fig)
 
-        # # create file and directory
-        # net_dir = os.path.join("reasoner", "net_demo")
-        # file_name = "{}_net.asp".format(image_name[:-4])
+        # create file and directory
+        net_dir = os.path.join(prediction_dir, "reasoner")
+        file_name = "{}_net.asp".format(image_name[:-4])
         # dlv_output_name = "{}_output_net.asp".format(image_name[:-4])
         # dlv_program_name = 'encoding.asp'
-        #
-        # # check if directory exist and the file is empty
-        # if not os.path.isdir(net_dir):
-        #     os.mkdir(os.path.join("reasoner", "net_demo"))
-        # if glob.glob(os.path.join(net_dir, file_name)):
-        #     os.remove(os.path.join(net_dir, file_name))
+
+        # check if directory exist and the file is empty
+        if not os.path.isdir(net_dir):
+            os.mkdir(os.path.join(prediction_dir, "reasoner"))
+        if glob.glob(os.path.join(net_dir, file_name)):
+            os.remove(os.path.join(net_dir, file_name))
         # if glob.glob(os.path.join(net_dir, dlv_output_name)):
         #     os.remove(os.path.join(net_dir, dlv_output_name))
-        #
-        # # write facts for DLV reasoner in a txt file
-        # with open(os.path.join(net_dir, file_name), "a") as f:
-        #     for i in range(r['rois'].shape[0]):
-        #         # NOTE: READ DESCRIPTION IN TOP OF FILE UNDERSTAND THE COORDINATES OF COMPONENT
-        #         xs = int(min(r['rois'][i, 1], r['rois'][i, 3]))
-        #         ys = int(min(r['rois'][i, 0], r['rois'][i, 2]))
-        #
-        #         xd = int(max(r['rois'][i, 1], r['rois'][i, 3]))
-        #         yd = int(max(r['rois'][i, 0], r['rois'][i, 2]))
-        #
-        #         f.write('net("{}",{},{},{},{},{}). \n'.format(r['class_ids'][i] - 1, i + 1,
-        #                                                       xs, ys,
-        #                                                       xd, yd))
+
+        # write facts for DLV reasoner in a txt file
+        with open(os.path.join(net_dir, file_name), "a") as f:
+            for i in range(r['rois'].shape[0]):
+                # NOTE: READ DESCRIPTION IN TOP OF FILE UNDERSTAND THE COORDINATES OF COMPONENT
+                xs = int(min(r['rois'][i, 1], r['rois'][i, 3]))
+                ys = int(min(r['rois'][i, 0], r['rois'][i, 2]))
+
+                xd = int(max(r['rois'][i, 1], r['rois'][i, 3]))
+                yd = int(max(r['rois'][i, 0], r['rois'][i, 2]))
+
+                f.write('net("{}",{},{},{},{},{}). \n'.format(r['class_ids'][i] - 1, i + 1,
+                                                              xs, ys,
+                                                              xd, yd))

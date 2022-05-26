@@ -793,6 +793,36 @@ def compute_recall(pred_boxes, gt_boxes, iou):
     return recall, positive_ids
 
 
+def compute_recall_range(pred_boxes, gt_boxes, iou_thresholds=None, verbose=1):
+    """Compute the recall at the given IoU threshold. It's an indication
+    of how many GT boxes were found by the given prediction boxes.
+
+    pred_boxes: [N, (y1, x1, y2, x2)] in image coordinates
+    gt_boxes: [N, (y1, x1, y2, x2)] in image coordinates
+    """
+    # Default is 0.5 to 0.95 with increments of 0.05
+    iou_thresholds = iou_thresholds or np.arange(0.5, 1.0, 0.05)
+
+    # Compute AP over range of IoU thresholds
+    Recall = []
+    for iou_threshold in iou_thresholds:
+        # Measure overlaps
+        overlaps = compute_overlaps(pred_boxes, gt_boxes)
+        iou_max = np.max(overlaps, axis=1)
+        iou_argmax = np.argmax(overlaps, axis=1)
+        positive_ids = np.where(iou_max >= iou_threshold)[0]
+        matched_gt_boxes = iou_argmax[positive_ids]
+
+        r = len(set(matched_gt_boxes)) / gt_boxes.shape[0]
+        Recall.append(r)
+
+    Recall = np.array(Recall).mean()
+    if verbose:
+        print("AP @{:.2f}-{:.2f}:\t {:.3f}".format(
+            iou_thresholds[0], iou_thresholds[-1], Recall))
+    return Recall
+
+
 # ## Batch Slicing
 # Some custom layers support a batch size of 1 only, and require a lot of work
 # to support batches greater than 1. This function slices an input tensor

@@ -3,8 +3,9 @@ import sys
 import warnings
 import numpy as np
 import elettrocablaggi
+from mrcnn.utils import compute_recall
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -16,7 +17,10 @@ with warnings.catch_warnings():
 
 if __name__ == '__main__':
 
-    info = {'test': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/labels.txt",
+    info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train_merge_comp/annots/labels.txt",
+                      'annotation_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train_merge_comp/annots/",
+                      'images_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train_merge_comp/images/"},
+            'test': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/labels.txt",
                      'annotation_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/",
                      'images_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/images/"},
             'saved_model_dir': "weights/elettrocablaggi/GRETA_230V/"}
@@ -49,7 +53,9 @@ if __name__ == '__main__':
     # image_ids = np.random.choice(dataset_val.image_ids, 10)
     image_ids = dataset_val.image_ids
     APs = []
+    recalls = []
     APs_range = []
+    Recalls_range = []
     for image_id in image_ids:
         # Load image and cad data
         image, image_meta, gt_class_id, gt_bbox, gt_mask = \
@@ -61,18 +67,32 @@ if __name__ == '__main__':
         results = model.detect([image], verbose=0)
         r = results[0]
 
-        # Compute AP
-        AP, precision, recall, overlap = utils.compute_ap(gt_bbox, gt_class_id, gt_mask,
-                                                          r["rois"], r["class_ids"], r["scores"], r['masks'])
-        APs.append(AP)
         print(f"########## Imagine {image_id} ##########")
+
+        # Compute AP
+        AP, _, _, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask,
+                                       r["rois"], r["class_ids"], r["scores"], r['masks'])
+        APs.append(AP)
+
+        # Compute recall
+        # print('predicted', r["rois"])
+        # print('ground trouth', gt_bbox)
+        iou = 0.5
+        recall, _ = compute_recall(r["rois"], gt_bbox, iou)
+        recalls.append(recall)
 
         # Compute AP - range 0.55:0.05:0.95
         AP_range = utils.compute_ap_range(gt_bbox, gt_class_id, gt_mask,
-                                          r["rois"], r["class_ids"], r["scores"], r['masks'])
+                                          r["rois"], r["class_ids"], r["scores"], r['masks'], verbose=0)
         APs_range.append(AP_range)
+
+        # Compute Recall - range 0.55:0.05:0.95
+        Recall_range = utils.compute_recall_range(r["rois"], gt_bbox, verbose=0)
+        Recalls_range.append(Recall_range)
 
     print("########## Evaluation on test dataset ##########")
     print(f"mAP @0.5: {np.mean(APs): .3f}, with standard deviation: {np.std(APs): .3f}")
+    print(f"recall @{iou}: {np.mean(recalls): .3f}, with standard deviation: {np.std(recalls): .3f}")
     print(f"mAP range [0.5:0.05:0.95]: {np.mean(APs_range): .3f}, with standard deviation: {np.std(APs_range): .3f}")
+    print(f"mRecall range [0.5:0.05:0.95]: {np.mean(Recalls_range): .3f}, with standard deviation: {np.std(Recalls_range): .3f}")
     print(f"Best AP: {max(APs): .3f} at Image: {APs.index(max(APs))}")
