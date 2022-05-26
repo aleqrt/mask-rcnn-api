@@ -751,20 +751,111 @@ def compute_ap(gt_boxes, gt_class_ids, gt_masks,
     return mAP, precisions, recalls, overlaps
 
 
+def compute_ap_area(gt_box, gt_class_id, gt_mask,
+                    pred_box, pred_class_id, pred_score, pred_mask,
+                    iou_threshold=0.5, area_threshold=(32, 32), verbose=1):
+    """Compute AP at IoU=0.5 across different areas.
+    Default:
+     - small area: <= 32x32
+     - big area: > 32x32 """
+    # Compute AP across different areas
+    AP_small = []
+    AP_big = []
+
+    gt_box_small = []
+    gt_class_id_small = []
+    gt_mask_small = []
+
+    gt_box_big = []
+    gt_class_id_big = []
+    gt_mask_big = []
+
+    area = (area_threshold[0] * area_threshold[1])
+
+    for i, box in enumerate(gt_box):
+        a = (box[3] - box[1]) * (box[2] - box[0])
+        if a <= area:
+            gt_box_small.append(gt_box[i])
+            gt_class_id_small.append(gt_class_id[i])
+            gt_mask_small.append(gt_mask[:,:,i])
+        else:
+            gt_box_big.append(gt_box[i])
+            gt_class_id_big.append(gt_class_id[i])
+            gt_mask_big.append(gt_mask[:,:,i])
+
+    gt_box_small = np.asarray(gt_box_small)
+    gt_class_id_small = np.asarray(gt_class_id_small)
+    gt_mask_small = np.asarray(gt_mask_small)
+    gt_mask_small = np.stack(gt_mask_small, axis=2)
+
+    gt_box_big = np.asarray(gt_box_big)
+    gt_class_id_big = np.asarray(gt_class_id_big)
+    gt_mask_big = np.asarray(gt_mask_big)
+    gt_mask_big = np.stack(gt_mask_big, axis=2)
+
+    pred_box_small, pred_class_id_small, pred_score_small, pred_mask_small = [], [], [], []
+    pred_box_big, pred_class_id_big, pred_score_big, pred_mask_big = [], [], [], []
+    for i, box in enumerate(pred_box):
+        a = (box[3] - box[1]) * (box[2] - box[0])
+        if a <= area:
+            pred_box_small.append(pred_box[i])
+            pred_class_id_small.append(pred_class_id[i])
+            pred_score_small.append(pred_score[i])
+            pred_mask_small.append(pred_mask[:,:,i])
+        else:
+            pred_box_big.append(pred_box[i])
+            pred_class_id_big.append(pred_class_id[i])
+            pred_score_big.append(pred_score[i])
+            pred_mask_big.append(pred_mask[:,:,i])
+
+    pred_box_small = np.asarray(pred_box_small)
+    pred_class_id_small = np.asarray(pred_class_id_small)
+    pred_score_small = np.asarray(pred_score_small)
+    pred_mask_small = np.asarray(pred_mask_small)
+    pred_mask_small = np.stack(pred_mask_small, axis=2)
+
+    pred_box_big = np.asarray(pred_box_big)
+    pred_class_id_big = np.asarray(pred_class_id_big)
+    pred_score_big = np.asarray(pred_score_big)
+    pred_mask_big = np.asarray(pred_mask_big)
+    pred_mask_big = np.stack(pred_mask_big, axis=2)
+
+    ap, precisions, recalls, overlaps = compute_ap(gt_box_small, gt_class_id_small, gt_mask_small,
+                                                   pred_box_small, pred_class_id_small, pred_score_small, pred_mask_small,
+                                                   iou_threshold=iou_threshold)
+    if verbose:
+        print("AP_small @{:.2f}:\t {:.3f}".format(iou_threshold, ap))
+    AP_small.append(ap)
+
+    ap, precisions, recalls, overlaps = compute_ap(gt_box_big, gt_class_id_big, gt_mask_big,
+                                                   pred_box_big, pred_class_id_big, pred_score_big, pred_mask_big,
+                                                   iou_threshold=iou_threshold)
+    if verbose:
+        print("AP_big @{:.2f}:\t {:.3f}".format(iou_threshold, ap))
+    AP_big.append(ap)
+
+    AP_small = np.array(AP_small).mean()
+    AP_big = np.array(AP_big).mean()
+    if verbose:
+        print("AP @ area <{:.2f}: {:.3f}. AP @ area >{:.2f}: {:.3f}.\t ".format(area, AP_small,
+                                                                                area, AP_big))
+    return AP_small, AP_big
+
+
 def compute_ap_range(gt_box, gt_class_id, gt_mask,
                      pred_box, pred_class_id, pred_score, pred_mask,
                      iou_thresholds=None, verbose=1):
     """Compute AP over a range or IoU thresholds. Default range is 0.5-0.95."""
     # Default is 0.5 to 0.95 with increments of 0.05
     iou_thresholds = iou_thresholds or np.arange(0.5, 1.0, 0.05)
-    
+
     # Compute AP over range of IoU thresholds
     AP = []
     for iou_threshold in iou_thresholds:
-        ap, precisions, recalls, overlaps =\
+        ap, precisions, recalls, overlaps = \
             compute_ap(gt_box, gt_class_id, gt_mask,
-                        pred_box, pred_class_id, pred_score, pred_mask,
-                        iou_threshold=iou_threshold)
+                       pred_box, pred_class_id, pred_score, pred_mask,
+                       iou_threshold=iou_threshold)
         if verbose:
             print("AP @{:.2f}:\t {:.3f}".format(iou_threshold, ap))
         AP.append(ap)
