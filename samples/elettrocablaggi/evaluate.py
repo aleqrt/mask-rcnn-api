@@ -56,6 +56,9 @@ if __name__ == '__main__':
     APs = []
     ARs = []
 
+    APs_75 = []
+    ARs_75 = []
+
     APs_range = []
     ARs_range = []
 
@@ -75,17 +78,23 @@ if __name__ == '__main__':
 
         print(f"########## Imagine {image_id} ##########")
 
-        # Compute AP
+        # Compute AP @0.5
         AP, _, _, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask,
                                        r["rois"], r["class_ids"], r["scores"], r['masks'])
         APs.append(AP)
 
-        # Compute recall
-        # print('predicted', r["rois"])
-        # print('ground trouth', gt_bbox)
-        iou = 0.5
-        recall, _ = compute_recall(r["rois"], gt_bbox, iou)
+        # Compute recall @0.5
+        recall, _ = compute_recall(r["rois"], gt_bbox)
         ARs.append(recall)
+
+        # Compute AP @0.75
+        AP, _, _, _ = utils.compute_ap(gt_bbox, gt_class_id, gt_mask,
+                                       r["rois"], r["class_ids"], r["scores"], r['masks'], iou_threshold=0.75)
+        APs_75.append(AP)
+
+        # Compute recall @0.75
+        recall, _ = compute_recall(r["rois"], gt_bbox, iou_threshold=0.75)
+        ARs_75.append(recall)
 
         # Compute AP - range 0.55:0.05:0.95
         AP_range = utils.compute_ap_range(gt_bbox, gt_class_id, gt_mask,
@@ -104,7 +113,10 @@ if __name__ == '__main__':
 
     print("########## Evaluation on test dataset ##########")
     print(f"mAP @0.5: {np.mean(APs): .3f}, with standard deviation: {np.std(APs): .3f}")
-    print(f"mAR @{iou}: {np.mean(ARs): .3f}, with standard deviation: {np.std(ARs): .3f}")
+    print(f"mAR @0.5: {np.mean(ARs): .3f}, with standard deviation: {np.std(ARs): .3f}")
+
+    print(f"mAP @0.75: {np.mean(APs_75): .3f}, with standard deviation: {np.std(APs_75): .3f}")
+    print(f"mAR @0.75: {np.mean(ARs_75): .3f}, with standard deviation: {np.std(ARs_75): .3f}")
 
     print(f"mAP range [0.5:0.05:0.95]: {np.mean(APs_range): .3f}, with standard deviation: {np.std(APs_range): .3f}")
     print(f"mAR range [0.5:0.05:0.95]: {np.mean(ARs_range): .3f},"
