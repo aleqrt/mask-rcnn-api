@@ -5,7 +5,7 @@ import elettrocablaggi
 import tensorflow as tf
 import imgaug.augmenters as iaa
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -26,9 +26,9 @@ if gpus:
         print(e)
 
 if __name__ == '__main__':
-    info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train_merge_comp/annots/labels.txt",
-                      'annotation_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train_merge_comp/annots/",
-                      'images_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train_merge_comp/images/"},
+    info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train/annots/labels.txt",
+                      'annotation_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train/annots/",
+                      'images_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train/images/"},
             'test': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/labels.txt",
                      'annotation_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/",
                      'images_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/images/"},

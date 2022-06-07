@@ -17,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import elettrocablaggi
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
