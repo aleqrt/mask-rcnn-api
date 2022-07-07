@@ -2344,7 +2344,7 @@ class MaskRCNN(object):
             keras.callbacks.TensorBoard(log_dir=self.log_dir,
                                         histogram_freq=0, write_graph=True, write_images=False),
             keras.callbacks.ModelCheckpoint(self.checkpoint_path,
-                                            verbose=0, save_weights_only=True),
+                                            verbose=0, save_weights_only=True, save_best_only=True),
             keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1,
                                               patience=20, min_lr=0.000001),
             keras.callbacks.CSVLogger(os.path.join(self.log_dir, 'logs.csv'), separator=","),
@@ -2381,6 +2381,9 @@ class MaskRCNN(object):
             use_multiprocessing=False,
             verbose=2,
         )
+        # TODO: save model in TF SavedModel format. It necessary for utilizing TF Serving in production.
+        #       In this moment there is the script to conversion in utils/convert_keras_to_tf.py
+        # tf.saved_model.save(self.keras_model, self.checkpoint_path + "/model.pd")
         self.epoch = max(self.epoch, epochs)
 
     def mold_inputs(self, images):

@@ -26,12 +26,12 @@ if gpus:
         print(e)
 
 if __name__ == '__main__':
-    info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train/annots/labels.txt",
-                      'annotation_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train/annots/",
-                      'images_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/train/images/"},
-            'test': {'label_file_path': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/labels.txt",
-                     'annotation_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/annots/",
-                     'images_dir': "dataset/elettrocablaggi_20200921/front_GRETA_230V/test/images/"},
+    info = {'train': {'label_file_path': "dataset/elettrocablaggi_20200921/GRETA_230V/train/annots/labels.txt",
+                      'annotation_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/train/annots/",
+                      'images_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/train/images/"},
+            'test': {'label_file_path': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/labels.txt",
+                     'annotation_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/annots/",
+                     'images_dir': "dataset/elettrocablaggi_20200921/GRETA_230V/test/images/"},
             'saved_model_dir': "weights/elettrocablaggi/GRETA_230V/",
             'coco_weights_path': "weights/mask_rcnn_coco.h5"}
 
@@ -63,7 +63,7 @@ if __name__ == '__main__':
                        exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",
                                 "mrcnn_bbox", "mrcnn_mask"])
 
-    retrain = False
+    retrain = True
     if retrain:
         # Load trained weights
         model_path = model.find_last()
